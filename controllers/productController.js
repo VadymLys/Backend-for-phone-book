@@ -3,9 +3,17 @@ import { getPostData } from "../utils/getPostData.js";
 // gets all products
 export async function getContacts(req, res) {
   try {
-    const products = await findAllContacts();
+    const contacts = await findAllContacts(req, res);
+
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(products));
+
+    res.end(
+      JSON.stringify({
+        status: 200,
+        message: "Successfully found contacts!",
+        data: contacts,
+      })
+    );
   } catch (error) {
     console.log(error.message);
   }

@@ -2,9 +2,8 @@ import { model, Schema } from "mongoose";
 
 const contactsSchema = new Schema(
   {
-    userId: {
+    _id: {
       type: Schema.Types.ObjectId,
-      ref: "User",
       required: true,
     },
 
@@ -19,9 +18,12 @@ const contactsSchema = new Schema(
     },
   },
   {
+    collection: "contactsBackend",
+  },
+  {
     timestamps: true,
     versionKey: false,
   }
 );
 
-export const ContactCollection = model("contacts", contactsSchema);
+export const ContactCollection = model("Contact", contactsSchema);

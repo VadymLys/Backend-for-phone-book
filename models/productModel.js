@@ -1,18 +1,10 @@
 import { ContactCollection } from "../db/models/contact.js";
 
-export async function findAllContacts(req, res, userId) {
+export async function findAllContacts(req, res) {
   try {
-    const contacts = await ContactCollection.find({ userId });
-
-    res.writeHead(200, { "Content-Type": "application/json" });
-
-    res.end(
-      JSON.stringify({
-        status: 200,
-        message: "Successfully found contacts!",
-        data: contacts,
-      })
-    );
+    const contacts = await ContactCollection.find();
+    console.log(contacts);
+    return contacts;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(
