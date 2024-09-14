@@ -42,3 +42,20 @@ export async function deleteContactById(req, res, id) {
     console.log(err.message);
   }
 }
+
+export async function contactCreate(payload) {
+  try {
+    const contact = await ContactCollection.create(payload);
+    return contact;
+  } catch (err) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 500,
+        message: "Internal Server Error",
+        error: err.message,
+      })
+    );
+    console.log(err.message);
+  }
+}

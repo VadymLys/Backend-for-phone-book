@@ -1,5 +1,9 @@
 import http from "http";
-import { deleteContact, getContacts } from "./controllers/productController.js";
+import {
+  createContact,
+  deleteContact,
+  getContacts,
+} from "./controllers/contactController.js";
 
 export const startServer = (port) => {
   const server = http.createServer((req, res) => {
@@ -8,12 +12,20 @@ export const startServer = (port) => {
 
     if (url === "/contacts" && method === "GET") {
       getContacts(req, res);
+    } else if (url === "/contacts" && method === "POST") {
+      createContact(req, res);
     } else if (
       url.match(/^\/contacts\/([a-fA-F0-9]{24})$/) &&
       method === "DELETE"
     ) {
       const id = url.split("/")[2];
       deleteContact(req, res, id);
+    } else if (url === "/users/register" && method === "POST") {
+      registerUser(req, res);
+    } else if (url === "/users/login" && method === "POST") {
+      loginUser(res, req);
+    } else if (url === "/users/logout" && method === "POST") {
+      logoutUser(res, req);
     }
   });
   server.listen(port, () => console.log(`Server running on port ${port}`));
