@@ -2,11 +2,6 @@ import { model, Schema } from "mongoose";
 
 const contactsSchema = new Schema(
   {
-    _id: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-
     name: {
       type: String,
       required: true,
@@ -19,8 +14,6 @@ const contactsSchema = new Schema(
   },
   {
     collection: "contactsBackend",
-  },
-  {
     timestamps: true,
     versionKey: false,
   }

@@ -1,4 +1,4 @@
-import { findAllContacts } from "../models/productModel.js";
+import { deleteContactById, findAllContacts } from "../models/productModel.js";
 import { getPostData } from "../utils/getPostData.js";
 // gets all products
 export async function getContacts(req, res) {
@@ -19,19 +19,27 @@ export async function getContacts(req, res) {
   }
 }
 
-// gets single products
-async function getProduct(req, res, id) {
+export async function deleteContact(req, res, id) {
   try {
-    const product = await Product.findById(id);
+    const contact = await deleteContactById(req, res, id);
 
-    if (!product) {
+    if (!contact) {
       res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Product not exist" }));
+      res.end(JSON.stringify({ message: "Contact not exist" }));
     } else {
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(product));
+      res.end(
+        JSON.stringify({
+          message: "Contact successfully deleted",
+          data: contact,
+        })
+      );
     }
   } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({ message: "Internal Server Error", error: error.message })
+    );
     console.log(error.message);
   }
 }
