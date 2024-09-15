@@ -4,6 +4,7 @@ import {
   deleteContact,
   getContacts,
 } from "./controllers/contactController.js";
+import { registerUser } from "./controllers/userControllers.js";
 
 export const startServer = (port) => {
   const server = http.createServer((req, res) => {

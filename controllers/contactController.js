@@ -71,16 +71,16 @@ export async function createContact(req, res) {
         data: savedContact,
       })
     );
-  } catch (error) {
+  } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
         status: 500,
         message: "Internal Server Error",
-        error: error.message,
+        err: err.message,
       })
     );
 
-    console.log(error.message);
+    console.log(err.message);
   }
 }
