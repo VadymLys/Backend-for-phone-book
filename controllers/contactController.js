@@ -5,7 +5,7 @@ import {
 } from "../services/contactServices.js";
 import { getPostData } from "../utils/getPostData.js";
 // gets all products
-export async function getContacts(req, res) {
+export async function getContactsController(req, res) {
   try {
     const contacts = await findAllContacts(req, res);
 
@@ -23,7 +23,7 @@ export async function getContacts(req, res) {
   }
 }
 
-export async function deleteContact(req, res, id) {
+export async function deleteContactController(req, res, id) {
   try {
     const contact = await deleteContactById(req, res, id);
 
@@ -50,7 +50,7 @@ export async function deleteContact(req, res, id) {
 
 // create a product
 
-export async function createContact(req, res) {
+export async function createContactController(req, res) {
   try {
     const body = await getPostData(req);
 
@@ -80,6 +80,7 @@ export async function createContact(req, res) {
         err: err.message,
       })
     );
+    Controller;
 
     console.log(err.message);
   }
