@@ -25,11 +25,11 @@ export const startServer = (port) => {
     ) {
       const id = url.split("/")[2];
       deleteContactController(req, res, id);
-    } else if (url === "/users/register" && method === "POST") {
+    } else if (url === "/users/signup" && method === "POST") {
       registerUserController(req, res);
     } else if (url === "/users/login" && method === "POST") {
       loginUserController(req, res);
-    } else if (url === "/users/logout" && method === "POST") {
+    } else if (url === "/auth/logout" && method === "POST") {
       logoutUserController(req, res);
     }
   });
