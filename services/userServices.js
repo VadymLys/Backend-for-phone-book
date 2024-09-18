@@ -26,7 +26,7 @@ export async function userRegistration(req, res, payload) {
   return savedUser;
 }
 
-export async function UserLogin(req, res, payload) {
+export async function userLogin(req, res, payload) {
   try {
     const user = await UsersCollection.findOne({ email: payload.email });
 
@@ -59,7 +59,7 @@ export async function UserLogin(req, res, payload) {
       userId: user._id,
       accessToken,
       refreshToken,
-      accessTokenValidUntil: new Date(Date.now + FIFTEEN_MINUTES),
+      accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
       refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
     });
 
@@ -75,4 +75,8 @@ export async function UserLogin(req, res, payload) {
     );
     console.log(err.message);
   }
+}
+
+export async function userLogout(payload) {
+  await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }

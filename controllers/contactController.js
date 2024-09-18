@@ -80,7 +80,6 @@ export async function createContactController(req, res) {
         err: err.message,
       })
     );
-    Controller;
 
     console.log(err.message);
   }

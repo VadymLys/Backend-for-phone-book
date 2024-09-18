@@ -1,5 +1,9 @@
 import { ONE_DAY } from "../constants/index.js";
-import { UserLogin, userRegistration } from "../services/userServices.js";
+import {
+  userLogin,
+  userLogout,
+  userRegistration,
+} from "../services/userServices.js";
 import { getPostData } from "../utils/getPostData.js";
 
 export async function registerUserController(req, res) {
@@ -56,9 +60,7 @@ export async function loginUserController(req, res) {
     const body = await getPostData(req);
     const { email, password } = JSON.parse(body);
 
-    const session = await UserLogin(req, res, { email, password });
-
-    console.log(session);
+    const session = await userLogin(req, res, { email, password });
 
     if (!email || !password) {
       res.writeHead(400, { "Content-Type": "application/json" });
@@ -95,6 +97,46 @@ export async function loginUserController(req, res) {
         },
       })
     );
+  } catch (err) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 500,
+        message: "Internal Server Error",
+        error: err.message,
+      })
+    );
+    console.log(err.message);
+  }
+}
+
+export async function logoutUserController(req, res) {
+  try {
+    const cookies = req.headers.cookie;
+    if (cookies) {
+      const cookiesArray = cookies.split(";");
+      const cookiesObject = cookiesArray.reduce((acc, cookie) => {
+        const [name, value] = cookie.trim().split("=");
+        acc[name] = value;
+        return acc;
+      }, {});
+
+      const sessionId = cookiesObject.sessionId;
+
+      if (sessionId) {
+        await userLogout(sessionId);
+      }
+    }
+
+    res.writeHead(204, {
+      "Set-Cookie": [
+        "sessionId=; HttpOnly; Max-Age=0",
+        "refreshToken=; HttpOnly; Max-Age=0",
+      ],
+      "Content-Type": "application/json",
+    });
+
+    res.end();
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(

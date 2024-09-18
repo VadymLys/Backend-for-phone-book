@@ -6,6 +6,7 @@ import {
 } from "./controllers/contactController.js";
 import {
   loginUserController,
+  logoutUserController,
   registerUserController,
 } from "./controllers/userControllers.js";
 

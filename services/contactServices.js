@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 export async function findAllContacts(req, res) {
   try {
     const contacts = await ContactCollection.find();
-    console.log(contacts);
     return contacts;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
