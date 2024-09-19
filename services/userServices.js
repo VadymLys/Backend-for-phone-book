@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
 import { SessionsCollection } from "../db/models/session.js";
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
+import jwt from "jsonwebtoken";
 
 export async function userRegistration(req, res, payload) {
   const user = await UsersCollection.findOne({ email: payload.email });
@@ -79,4 +80,84 @@ export async function userLogin(req, res, payload) {
 
 export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
+}
+
+function createSession() {
+  const acessToken = randomBytes(30).toString("base64");
+  const refreshToken = randomBytes(30).toString("base64");
+
+  return {
+    acessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+  };
+}
+
+export async function refreshUsersSession(
+  req,
+  res,
+  { sessionId, refreshToken }
+) {
+  const session = await SessionsCollection.findOne({
+    _id: sessionId,
+    refreshToken,
+  });
+
+  if (!session) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 401,
+        message: "Session not found",
+      })
+    );
+  }
+
+  const isSessionTokenExpired =
+    new Date() > new Date(session.refreshTokenValidUntil);
+
+  if (isSessionTokenExpired) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 401,
+        message: "Session token expired",
+      })
+    );
+  }
+
+  const newSession = createSession();
+
+  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+
+  return await SessionsCollection.create({
+    userId: session.userId,
+    ...newSession,
+  });
+}
+
+export async function requestResetToken(req, res, email) {
+  const user = await UsersCollection.findOne({ email });
+
+  if (!user) {
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 404,
+        message: "User not found",
+      })
+    );
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env("JWT_SECRET"),
+    {
+      expiresIn: "15m",
+    }
+  );
 }

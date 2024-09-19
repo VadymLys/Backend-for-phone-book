@@ -1,5 +1,6 @@
 import { ONE_DAY } from "../constants/index.js";
 import {
+  refreshUsersSession,
   userLogin,
   userLogout,
   userRegistration,
@@ -148,4 +149,35 @@ export async function logoutUserController(req, res) {
     );
     console.log(err.message);
   }
+
+  const setupSession = (res, session) => {
+    res.setHeader("Set-Cookie", [
+      `refreshToken=${session.refreshToken}; HttpOnly; Expires=${
+        new Date(Date.now() + ONE_DAY).toUTCString
+      }`,
+      `sessionId=${session._id}; HttpOnly; Expires=${new Date(
+        Date.now() + ONE_DAY
+      ).toUTCString()}`,
+    ]);
+  };
+}
+
+export async function refreshUserSessionController(req, res) {
+  const session = await refreshUsersSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
+
+  setupSession(res, session);
+
+  res.writeHead(201, { "Content-Type": "application/json" });
+  return res.end(
+    JSON.stringify({
+      status: 200,
+      message: "Successfully  refreshed a session!",
+      data: {
+        accessToken: session.accessToken,
+      },
+    })
+  );
 }

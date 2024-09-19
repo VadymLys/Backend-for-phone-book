@@ -7,6 +7,7 @@ import {
 import {
   loginUserController,
   logoutUserController,
+  refreshUserSessionController,
   registerUserController,
 } from "./controllers/userControllers.js";
 
@@ -31,6 +32,8 @@ export const startServer = (port) => {
       loginUserController(req, res);
     } else if (url === "/auth/logout" && method === "POST") {
       logoutUserController(req, res);
+    } else if (url === "/users/current" && method === "GET") {
+      refreshUserSessionController(req, res);
     }
   });
   server.listen(port, () => console.log(`Server running on port ${port}`));
