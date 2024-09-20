@@ -6,6 +6,7 @@ import {
   userRegistration,
 } from "../services/userServices.js";
 import { getPostData } from "../utils/getPostData.js";
+import { parseCookies } from "../utils/parseCookies.js";
 
 export async function registerUserController(req, res) {
   try {
@@ -149,23 +150,27 @@ export async function logoutUserController(req, res) {
     );
     console.log(err.message);
   }
-
-  const setupSession = (res, session) => {
-    res.setHeader("Set-Cookie", [
-      `refreshToken=${session.refreshToken}; HttpOnly; Expires=${
-        new Date(Date.now() + ONE_DAY).toUTCString
-      }`,
-      `sessionId=${session._id}; HttpOnly; Expires=${new Date(
-        Date.now() + ONE_DAY
-      ).toUTCString()}`,
-    ]);
-  };
 }
 
+const setupSession = (res, session) => {
+  res.setHeader("Set-Cookie", [
+    `refreshToken=${session.refreshToken}; HttpOnly; Expires=${
+      new Date(Date.now() + ONE_DAY).toUTCString
+    }`,
+    `sessionId=${session._id}; HttpOnly; Expires=${new Date(
+      Date.now() + ONE_DAY
+    ).toUTCString()}`,
+  ]);
+};
+
 export async function refreshUserSessionController(req, res) {
-  const session = await refreshUsersSession({
-    sessionId: req.cookies.sessionId,
-    refreshToken: req.cookies.refreshToken,
+  const cookies = parseCookies(req);
+  const sessionId = cookies.sessionId;
+  const refreshToken = cookies.refreshToken;
+
+  const session = await refreshUsersSession(req, res, {
+    sessionId,
+    refreshToken,
   });
 
   setupSession(res, session);

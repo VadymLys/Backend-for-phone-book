@@ -10,8 +10,8 @@ export function getPostData(req) {
           resolve(body);
         });
       });
-    } catch (error) {
-      console.log(error.message);
+    } catch (err) {
+      console.log(err.message);
     }
   });
 }

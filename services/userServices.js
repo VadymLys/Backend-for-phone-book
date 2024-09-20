@@ -82,17 +82,17 @@ export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }
 
-function createSession() {
-  const acessToken = randomBytes(30).toString("base64");
+const createSession = () => {
+  const accessToken = randomBytes(30).toString("base64");
   const refreshToken = randomBytes(30).toString("base64");
 
   return {
-    acessToken,
+    accessToken,
     refreshToken,
     accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
     refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
   };
-}
+};
 
 export async function refreshUsersSession(
   req,

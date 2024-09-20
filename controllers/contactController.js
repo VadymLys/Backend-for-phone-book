@@ -39,12 +39,12 @@ export async function deleteContactController(req, res, id) {
         })
       );
     }
-  } catch (error) {
+  } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({ message: "Internal Server Error", error: error.message })
     );
-    console.log(error.message);
+    console.log(err.message);
   }
 }
 
