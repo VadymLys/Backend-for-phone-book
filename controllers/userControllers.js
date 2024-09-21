@@ -5,6 +5,7 @@ import {
   userLogout,
   userRegistration,
 } from "../services/userServices.js";
+import { generateToken } from "../utils/generateToken.js";
 import { getPostData } from "../utils/getPostData.js";
 import { parseCookies } from "../utils/parseCookies.js";
 
@@ -30,16 +31,19 @@ export async function registerUserController(req, res) {
     });
 
     if (savedUser) {
+      const token = generateToken(savedUser);
+
       res.writeHead(201, { "Content-Type": "application/json" });
       return res.end(
         JSON.stringify({
           status: 201,
           message: "User created successfully!",
-          data: {
+          user: {
             id: savedUser._id,
             name: savedUser.name,
             email: savedUser.email,
           },
+          token: token,
         })
       );
     }

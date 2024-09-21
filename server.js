@@ -15,6 +15,7 @@ const setCORSHeaders = (res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 };
 
 export const startServer = (port) => {
@@ -25,7 +26,7 @@ export const startServer = (port) => {
     const method = req.method;
 
     if (method === "OPTIONS") {
-      res.writeHead(200);
+      res.writeHead(204);
       return res.end();
     }
 
