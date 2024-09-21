@@ -1,10 +1,28 @@
 import { ContactCollection } from "../db/models/contact.js";
 import mongoose from "mongoose";
+import { UsersCollection } from "../db/models/user.js";
 
 export async function findAllContacts(req, res) {
   try {
     const contacts = await ContactCollection.find();
     return contacts;
+  } catch (err) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 500,
+        message: "Internal Server Error",
+        error: err.message,
+      })
+    );
+    console.log(err.message);
+  }
+}
+
+export async function getUserById(userId) {
+  try {
+    const user = await UsersCollection.findById(userId);
+    return user;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(

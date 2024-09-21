@@ -1,4 +1,5 @@
 import { ONE_DAY } from "../constants/index.js";
+import { getUserById } from "../services/contactServices.js";
 import {
   refreshUsersSession,
   userLogin,
@@ -167,26 +168,41 @@ const setupSession = (res, session) => {
   ]);
 };
 
-export async function refreshUserSessionController(req, res) {
-  const cookies = parseCookies(req);
-  const sessionId = cookies.sessionId;
-  const refreshToken = cookies.refreshToken;
+export async function refreshUserSessionController(req, res, token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
 
-  const session = await refreshUsersSession(req, res, {
-    sessionId,
-    refreshToken,
-  });
+    const user = await getUserById(userId);
 
-  setupSession(res, session);
+    if (!user) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({
+          status: 404,
+          message: "User not found",
+        })
+      );
+    }
 
-  res.writeHead(201, { "Content-Type": "application/json" });
-  return res.end(
-    JSON.stringify({
-      status: 200,
-      message: "Successfully  refreshed a session!",
-      data: {
-        accessToken: session.accessToken,
-      },
-    })
-  );
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(
+      JSON.stringify({
+        status: 200,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      })
+    );
+  } catch (error) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    return res.end(
+      JSON.stringify({
+        status: 401,
+        message: "Invalid or expired token",
+      })
+    );
+  }
 }

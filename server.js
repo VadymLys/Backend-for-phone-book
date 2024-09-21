@@ -13,7 +13,10 @@ import {
 
 const setCORSHeaders = (res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 };
@@ -47,6 +50,7 @@ export const startServer = (port) => {
     } else if (url === "/auth/logout" && method === "POST") {
       logoutUserController(req, res);
     } else if (url === "/users/current" && method === "GET") {
+      const token = req.headers.authorization.split(" ")[1];
       refreshUserSessionController(req, res);
     } else {
       res.writeHead(404, { "Content-Type": "application/json" });
