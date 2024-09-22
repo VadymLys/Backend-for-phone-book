@@ -168,41 +168,26 @@ const setupSession = (res, session) => {
   ]);
 };
 
-export async function refreshUserSessionController(req, res, token) {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
+export async function refreshUserSessionController(req, res) {
+  const cookies = parseCookies(req);
+  const sessionId = cookies.sessionId;
+  const refreshToken = cookies.refreshToken;
 
-    const user = await getUserById(userId);
+  const session = await refreshUsersSession(req, res, {
+    sessionId,
+    refreshToken,
+  });
 
-    if (!user) {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      return res.end(
-        JSON.stringify({
-          status: 404,
-          message: "User not found",
-        })
-      );
-    }
+  setupSession(res, session);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(
-      JSON.stringify({
-        status: 200,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-        },
-      })
-    );
-  } catch (error) {
-    res.writeHead(401, { "Content-Type": "application/json" });
-    return res.end(
-      JSON.stringify({
-        status: 401,
-        message: "Invalid or expired token",
-      })
-    );
-  }
+  res.writeHead(201, { "Content-Type": "application/json" });
+  return res.end(
+    JSON.stringify({
+      status: 200,
+      message: "Successfully  refreshed a session!",
+      data: {
+        accessToken: session.accessToken,
+      },
+    })
+  );
 }

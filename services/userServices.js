@@ -67,7 +67,7 @@ export async function userLogin(req, res, payload) {
     return session;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 500,
         message: "Internal Server Error",
@@ -81,18 +81,6 @@ export async function userLogin(req, res, payload) {
 export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }
-
-const createSession = () => {
-  const accessToken = randomBytes(30).toString("base64");
-  const refreshToken = randomBytes(30).toString("base64");
-
-  return {
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
-  };
-};
 
 export async function refreshUsersSession(
   req,

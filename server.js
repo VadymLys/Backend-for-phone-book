@@ -29,7 +29,7 @@ export const startServer = (port) => {
     const method = req.method;
 
     if (method === "OPTIONS") {
-      res.writeHead(204);
+      res.writeHead(200);
       return res.end();
     }
 
@@ -50,7 +50,6 @@ export const startServer = (port) => {
     } else if (url === "/auth/logout" && method === "POST") {
       logoutUserController(req, res);
     } else if (url === "/users/current" && method === "GET") {
-      const token = req.headers.authorization.split(" ")[1];
       refreshUserSessionController(req, res);
     } else {
       res.writeHead(404, { "Content-Type": "application/json" });
