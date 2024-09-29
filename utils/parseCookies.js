@@ -1,13 +1,17 @@
 export function parseCookies(req) {
   const list = {};
   const cookieHeader = req.headers.cookie;
+  console.log(cookieHeader);
 
   if (cookieHeader) {
     cookieHeader.split(";").forEach((cookie) => {
       const parts = cookie.split("=");
-      const key = parts[0].trim();
-      const value = decodeURIComponent(parts[1]);
-      list[key] = value;
+
+      if (parts.length === 2) {
+        const key = decodeURIComponent(parts[0].trim());
+        const value = decodeURIComponent(parts[1].trim());
+        list[key] = value;
+      }
     });
   }
 

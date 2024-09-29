@@ -45,7 +45,6 @@ export async function deleteContactById(req, res, id) {
     }
 
     const contact = await ContactCollection.findOneAndDelete({ _id: id });
-
     return contact;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });

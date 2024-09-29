@@ -74,13 +74,24 @@ export async function userLogin(req, res, payload) {
         error: err.message,
       })
     );
-    console.log(err.message);
   }
 }
 
 export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }
+
+const createSession = () => {
+  const accessToken = randomBytes(30).toString("base64");
+  const refreshToken = randomBytes(30).toString("base64");
+
+  return {
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+  };
+};
 
 export async function refreshUsersSession(
   req,
@@ -94,7 +105,7 @@ export async function refreshUsersSession(
 
   if (!session) {
     res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 401,
         message: "Session not found",
@@ -107,7 +118,7 @@ export async function refreshUsersSession(
 
   if (isSessionTokenExpired) {
     res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 401,
         message: "Session token expired",
@@ -130,7 +141,7 @@ export async function requestResetToken(req, res, email) {
 
   if (!user) {
     res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 404,
         message: "User not found",

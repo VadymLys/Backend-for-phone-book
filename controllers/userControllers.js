@@ -6,9 +6,9 @@ import {
   userLogout,
   userRegistration,
 } from "../services/userServices.js";
-import { generateToken } from "../utils/generateToken.js";
 import { getPostData } from "../utils/getPostData.js";
 import { parseCookies } from "../utils/parseCookies.js";
+import jwt from "jsonwebtoken";
 
 export async function registerUserController(req, res) {
   try {
@@ -32,15 +32,22 @@ export async function registerUserController(req, res) {
     });
 
     if (savedUser) {
-      const token = generateToken(savedUser);
+      const token = jwt.sign(
+        {
+          name: savedUser.name,
+          email: savedUser.email,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
 
       res.writeHead(201, { "Content-Type": "application/json" });
+      console.log(savedUser);
       return res.end(
         JSON.stringify({
           status: 201,
           message: "User created successfully!",
           user: {
-            id: savedUser._id,
             name: savedUser.name,
             email: savedUser.email,
           },
@@ -49,15 +56,16 @@ export async function registerUserController(req, res) {
       );
     }
   } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({
-        status: 500,
-        message: "Internal Server Error",
-        err: err.message,
-      })
-    );
-
+    if (!res.headersSent) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({
+          status: 500,
+          message: "Internal Server Error",
+          err: err.message,
+        })
+      );
+    }
     console.log(err.message);
   }
 }
@@ -99,21 +107,20 @@ export async function loginUserController(req, res) {
       JSON.stringify({
         status: 200,
         message: "Successfully logged in!",
-        data: {
+        user: {
           accessToken: session.accessToken,
         },
       })
     );
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 500,
         message: "Internal Server Error",
         error: err.message,
       })
     );
-    console.log(err.message);
   }
 }
 
@@ -146,22 +153,21 @@ export async function logoutUserController(req, res) {
     res.end();
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 500,
         message: "Internal Server Error",
         error: err.message,
       })
     );
-    console.log(err.message);
   }
 }
 
 const setupSession = (res, session) => {
   res.setHeader("Set-Cookie", [
-    `refreshToken=${session.refreshToken}; HttpOnly; Expires=${
-      new Date(Date.now() + ONE_DAY).toUTCString
-    }`,
+    `refreshToken=${session.refreshToken}; HttpOnly; Expires=${new Date(
+      Date.now() + ONE_DAY
+    ).toUTCString()}`,
     `sessionId=${session._id}; HttpOnly; Expires=${new Date(
       Date.now() + ONE_DAY
     ).toUTCString()}`,
@@ -169,25 +175,41 @@ const setupSession = (res, session) => {
 };
 
 export async function refreshUserSessionController(req, res) {
-  const cookies = parseCookies(req);
-  const sessionId = cookies.sessionId;
-  const refreshToken = cookies.refreshToken;
+  try {
+    const cookies = parseCookies(req);
 
-  const session = await refreshUsersSession(req, res, {
-    sessionId,
-    refreshToken,
-  });
+    const { sessionId, refreshToken } = cookies;
 
-  setupSession(res, session);
+    const session = await refreshUsersSession(req, res, {
+      sessionId: sessionId,
+      refreshToken: refreshToken,
+    });
 
-  res.writeHead(201, { "Content-Type": "application/json" });
-  return res.end(
-    JSON.stringify({
-      status: 200,
-      message: "Successfully  refreshed a session!",
-      data: {
-        accessToken: session.accessToken,
-      },
-    })
-  );
+    if (!sessionId || !refreshToken) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ message: "Session or token missing" }));
+    }
+
+    setupSession(res, session);
+
+    res.writeHead(201, { "Content-Type": "application/json" });
+    return res.end(
+      JSON.stringify({
+        status: 200,
+        message: "Successfully  refreshed a session!",
+        data: {
+          accessToken: session.accessToken,
+        },
+      })
+    );
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    return res.end(
+      JSON.stringify({
+        status: 500,
+        message: "Internal Server Error",
+        error: error.message,
+      })
+    );
+  }
 }
