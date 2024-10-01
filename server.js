@@ -10,10 +10,11 @@ import {
   refreshUserSessionController,
   registerUserController,
 } from "./controllers/userControllers.js";
+import { findAvailablePort } from "./utils/findDesiredPort.js";
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://backend-for-phone-book.onrender.com",
+  "https://goit-react-hw-08-phi-six.vercel.app/",
 ];
 
 const setCORSHeaders = (req, res) => {
@@ -72,5 +73,11 @@ export const startServer = (port) => {
       res.end(JSON.stringify({ message: "Not Found" }));
     }
   });
-  server.listen(port, () => console.log(`Server running on port ${port}`));
+
+  const desiredPort = process.env.PORT || 3000;
+  findAvailablePort(desiredPort).then((port) => {
+    server.listen(port, () => {
+      console.log(`server listening on port http://localhost:${port}`);
+    });
+  });
 };
