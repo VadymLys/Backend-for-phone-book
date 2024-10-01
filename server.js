@@ -14,7 +14,7 @@ import { findAvailablePort } from "./utils/findDesiredPort.js";
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://goit-react-hw-08-phi-six.vercel.app/",
+  "https://goit-react-hw-08-phi-six.vercel.app",
 ];
 
 const setCORSHeaders = (req, res) => {
