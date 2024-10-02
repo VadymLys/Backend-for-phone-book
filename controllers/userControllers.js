@@ -109,6 +109,7 @@ export async function loginUserController(req, res) {
         message: "Successfully logged in!",
         user: {
           accessToken: session.accessToken,
+          name: session.name,
         },
       })
     );

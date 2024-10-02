@@ -12,10 +12,7 @@ import {
 } from "./controllers/userControllers.js";
 import { findAvailablePort } from "./utils/findDesiredPort.js";
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://goit-react-hw-08-phi-six.vercel.app/",
-];
+const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
 const setCORSHeaders = (req, res) => {
   const origin = req.headers.origin;
@@ -39,7 +36,7 @@ const setCORSHeaders = (req, res) => {
   return false;
 };
 
-export const startServer = (port) => {
+export const startServer = () => {
   const server = http.createServer((req, res) => {
     const handledCors = setCORSHeaders(req, res);
 

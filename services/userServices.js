@@ -64,7 +64,10 @@ export async function userLogin(req, res, payload) {
       refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
     });
 
-    return session;
+    return {
+      ...session.toObject(),
+      name: user.name,
+    };
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     return res.end(
