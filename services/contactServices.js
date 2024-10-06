@@ -1,11 +1,22 @@
 import { ContactCollection } from "../db/models/contact.js";
 import mongoose from "mongoose";
 import { UsersCollection } from "../db/models/user.js";
+import { calculatePaginationData } from "../utils/calculatePaginationData.js";
 
-export async function findAllContacts(req, res) {
+export async function findAllContacts(req, res, { page = 1, perPage = 10 }) {
   try {
-    const contacts = await ContactCollection.find();
-    return contacts;
+    const limit = perPage;
+    const skip = (page - 1) * perPage;
+
+    const contactsQuery = ContactCollection.find({}).skip(skip).limit(limit);
+
+    const total = await ContactCollection.countDocuments();
+
+    const contacts = await contactsQuery.exec();
+
+    const paginationData = calculatePaginationData(total, limit, page);
+
+    return { contacts, total, ...paginationData };
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     res.end(

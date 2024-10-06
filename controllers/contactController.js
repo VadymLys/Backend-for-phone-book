@@ -3,11 +3,19 @@ import {
   deleteContactById,
   findAllContacts,
 } from "../services/contactServices.js";
+import { authenticateToken } from "../utils/authenticateToken.js";
 import { getPostData } from "../utils/getPostData.js";
+import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 // gets all products
 export async function getContactsController(req, res) {
   try {
-    const contacts = await findAllContacts(req, res);
+    const { page, perPage } = parsePaginationParams(req);
+
+    const { contacts, total, ...paginationData } = await findAllContacts(
+      req,
+      res,
+      { page, perPage }
+    );
 
     res.writeHead(200, { "Content-Type": "application/json" });
 
@@ -15,7 +23,11 @@ export async function getContactsController(req, res) {
       JSON.stringify({
         status: 200,
         message: "Successfully found contacts!",
-        data: contacts,
+        data: {
+          contacts,
+          total,
+          pagination: paginationData,
+        },
       })
     );
   } catch (error) {
