@@ -80,6 +80,23 @@ export async function userLogin(req, res, payload) {
   }
 }
 
+export async function getUserById(userId) {
+  try {
+    const user = await UsersCollection.findById(userId);
+    return user;
+  } catch (err) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        status: 500,
+        message: "Internal Server Error",
+        error: err.message,
+      })
+    );
+    console.log(err.message);
+  }
+}
+
 export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }

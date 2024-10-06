@@ -3,7 +3,6 @@ import {
   deleteContactById,
   findAllContacts,
 } from "../services/contactServices.js";
-import { authenticateToken } from "../utils/authenticateToken.js";
 import { getPostData } from "../utils/getPostData.js";
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 // gets all products
