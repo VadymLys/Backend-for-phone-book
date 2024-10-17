@@ -4,6 +4,7 @@ import { randomBytes } from "crypto";
 import { SessionsCollection } from "../db/models/session.js";
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 export async function userRegistration(req, res, payload) {
   const user = await UsersCollection.findOne({ email: payload.email });
@@ -24,6 +25,7 @@ export async function userRegistration(req, res, payload) {
   });
 
   const savedUser = await newUser.save();
+
   return savedUser;
 }
 
@@ -32,51 +34,43 @@ export async function userLogin(req, res, payload) {
     const user = await UsersCollection.findOne({ email: payload.email });
 
     if (!user) {
-      res.end(
-        JSON.stringify({
-          status: 404,
-          message: "User not found",
-        })
-      );
+      return console.error("User is not found");
     }
 
     const isEqual = await bcrypt.compare(payload.password, user.password);
 
     if (!isEqual) {
-      res.end(
-        JSON.stringify({
-          status: 401,
-          message: "Unauthorized",
-        })
-      );
+      return console.error("isEqual is not found");
     }
 
-    await SessionsCollection.deleteOne({ userId: user._id });
+    const result = await SessionsCollection.deleteOne({ userId: user._id });
 
-    const accessToken = randomBytes(30).toString("base64");
-    const refreshToken = randomBytes(30).toString("base64");
+    console.log("Login deleted session", result);
+
+    const newSession = createSession(user._id);
+    console.log("🚀 ~ userLogin ~ newSession:", newSession);
 
     const session = await SessionsCollection.create({
       userId: user._id,
-      accessToken,
-      refreshToken,
-      accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-      refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+      accessToken: newSession.accessToken,
+      refreshToken: newSession.refreshToken,
+      accessTokenValidUntil: newSession.accessTokenValidUntil,
+      refreshTokenValidUntil: newSession.refreshTokenValidUntil,
+      sessionId: newSession.sessionId,
     });
+    console.log("🚀 ~ userLogin ~ session:", session);
 
-    return {
+    const userSession = {
       ...session.toObject(),
       name: user.name,
     };
+    console.log("🚀 ~ userLogin ~ userSession:", userSession);
+    return userSession;
   } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    return res.end(
-      JSON.stringify({
-        status: 500,
-        message: "Internal Server Error",
-        error: err.message,
-      })
-    );
+    console.error("Error during user login:", err.message);
+
+    // Логічно відловлюємо помилку у контролері
+    throw new Error("Error during user login");
   }
 }
 
@@ -86,7 +80,7 @@ export async function getUserById(userId) {
     return user;
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(
+    return res.end(
       JSON.stringify({
         status: 500,
         message: "Internal Server Error",
@@ -101,26 +95,37 @@ export async function userLogout(payload) {
   await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
 }
 
-const createSession = () => {
+const createSession = (userId) => {
   const accessToken = randomBytes(30).toString("base64");
   const refreshToken = randomBytes(30).toString("base64");
+  const sessionId = randomBytes(20).toString("hex");
 
-  return {
+  const session = {
+    sessionId,
+    userId,
     accessToken,
     refreshToken,
     accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
     refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
   };
+  console.log("🚀 ~ createSession ~ session:", session);
+
+  return session;
 };
 
 export async function refreshUsersSession(
   req,
   res,
-  { sessionId, refreshToken }
+  { userId, refreshToken, sessionId }
 ) {
+  console.log("🚀 ~ userId:", userId);
+  console.log("🚀 ~ refreshToken:", refreshToken);
+  console.log("🚀 ~ sessionId:", sessionId);
+
   const session = await SessionsCollection.findOne({
-    _id: sessionId,
-    refreshToken,
+    userId: userId,
+    refreshToken: refreshToken,
+    sessionId: sessionId,
   });
 
   if (!session) {
@@ -132,6 +137,7 @@ export async function refreshUsersSession(
       })
     );
   }
+  console.log("Found session:", session);
 
   const isSessionTokenExpired =
     new Date() > new Date(session.refreshTokenValidUntil);
@@ -146,14 +152,17 @@ export async function refreshUsersSession(
     );
   }
 
-  const newSession = createSession();
+  const newSession = createSession(userId);
 
-  await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+  session.accessToken = newSession.accessToken;
+  session.refreshToken = newSession.refreshToken;
+  session.accessTokenValidUntil = newSession.accessTokenValidUntil;
+  session.refreshTokenValidUntil = newSession.refreshTokenValidUntil;
+  session.sessionId = newSession.sessionId;
 
-  return await SessionsCollection.create({
-    userId: session.userId,
-    ...newSession,
-  });
+  await session.save();
+  console.log("🚀 ~ refreshUsersSession ~ session:", session);
+  return session;
 }
 
 export async function requestResetToken(req, res, email) {
@@ -179,4 +188,5 @@ export async function requestResetToken(req, res, email) {
       expiresIn: "15m",
     }
   );
+  return resetToken;
 }

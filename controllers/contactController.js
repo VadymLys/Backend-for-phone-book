@@ -8,7 +8,13 @@ import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 // gets all products
 export async function getContactsController(req, res) {
   try {
-    const { page, perPage } = parsePaginationParams(req);
+    const urlParams = new URLSearchParams(req.url.split("?")[1]);
+
+    const paginationParams = parsePaginationParams(
+      Object.fromEntries(urlParams)
+    );
+
+    const { page, perPage } = paginationParams;
 
     const { contacts, total, ...paginationData } = await findAllContacts(
       req,

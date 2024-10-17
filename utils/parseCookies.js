@@ -1,7 +1,7 @@
 export function parseCookies(req) {
   const list = {};
   const cookieHeader = req.headers.cookie;
-  console.log(cookieHeader);
+  console.log("Cookie Header=============", cookieHeader);
 
   if (cookieHeader) {
     cookieHeader.split(";").forEach((cookie) => {

@@ -1,14 +1,17 @@
-import { ONE_DAY } from "../constants/index.js";
-import { getUserById } from "../services/contactServices.js";
+import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
+import { UsersCollection } from "../db/models/user.js";
 import {
   refreshUsersSession,
   userLogin,
   userLogout,
   userRegistration,
 } from "../services/userServices.js";
+import { getUserIdFromToken } from "../utils/generateToken.js";
 import { getPostData } from "../utils/getPostData.js";
 import { parseCookies } from "../utils/parseCookies.js";
 import jwt from "jsonwebtoken";
+import { setCookie } from "../utils/setCookie.js";
+import mongoose from "mongoose";
 
 export async function registerUserController(req, res) {
   try {
@@ -34,12 +37,18 @@ export async function registerUserController(req, res) {
     if (savedUser) {
       const token = jwt.sign(
         {
+          userId: savedUser._id,
           name: savedUser.name,
           email: savedUser.email,
         },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
+      console.log("🚀 ~ registerUserController ~ token :", token);
+
+      res.setHeader("Set-Cookie", [
+        `accessToken=${token}; HttpOnly; Max-Age=${FIFTEEN_MINUTES}`,
+      ]);
 
       res.writeHead(201, { "Content-Type": "application/json" });
       console.log(savedUser);
@@ -75,8 +84,6 @@ export async function loginUserController(req, res) {
     const body = await getPostData(req);
     const { email, password } = JSON.parse(body);
 
-    const session = await userLogin(req, res, { email, password });
-
     if (!email || !password) {
       res.writeHead(400, { "Content-Type": "application/json" });
       return res.end(
@@ -86,6 +93,9 @@ export async function loginUserController(req, res) {
         })
       );
     }
+
+    const session = await userLogin(req, res, { email, password });
+    console.log("🚀 ~ loginUserController ~ session:", session);
 
     if (!session) {
       res.writeHead(401, { "Content-Type": "application/json" });
@@ -97,10 +107,39 @@ export async function loginUserController(req, res) {
       );
     }
 
-    res.setHeader("Set-Cookie", [
-      `refreshToken=${session.refreshToken}; HttpOnly; Max-Age=${ONE_DAY}`,
-      `sessionId=${session._id}; HttpOnly; Max-Age=${ONE_DAY}`,
+    const { accessToken, refreshToken, sessionId } = session;
+
+    setCookie(res, [
+      {
+        name: "accessToken",
+        value: accessToken,
+        options: {
+          HttpOnly: true,
+          MaxAge: ONE_DAY,
+        },
+      },
+      {
+        name: "refreshToken",
+        value: refreshToken,
+        options: {
+          HttpOnly: true,
+          MaxAge: ONE_DAY,
+        },
+      },
+      {
+        name: "sessionId",
+        value: sessionId,
+        options: {
+          HttpOnly: true,
+          MaxAge: ONE_DAY,
+        },
+      },
     ]);
+
+    console.log(
+      "🚀 ~ loginUserController ~ session.refreshToken:",
+      refreshToken
+    );
 
     res.writeHead(201, { "Content-Type": "application/json" });
     return res.end(
@@ -108,9 +147,10 @@ export async function loginUserController(req, res) {
         status: 200,
         message: "Successfully logged in!",
         user: {
-          accessToken: session.accessToken,
           name: session.name,
+          email: session.email,
         },
+        token: accessToken,
       })
     );
   } catch (err) {
@@ -127,31 +167,31 @@ export async function loginUserController(req, res) {
 
 export async function logoutUserController(req, res) {
   try {
-    const cookies = req.headers.cookie;
-    if (cookies) {
-      const cookiesArray = cookies.split(";");
-      const cookiesObject = cookiesArray.reduce((acc, cookie) => {
-        const [name, value] = cookie.trim().split("=");
-        acc[name] = value;
-        return acc;
-      }, {});
+    setCookie(res, [
+      {
+        name: "sessionId",
+        value: "",
+        options: { MaxAge: 0, HttpOnly: true },
+      },
+      {
+        name: "refreshToken",
+        value: "",
+        options: { MaxAge: 0, HttpOnly: true },
+      },
+      {
+        name: "accessToken",
+        value: "",
+        options: { MaxAge: 0, HttpOnly: true },
+      },
+    ]);
 
-      const sessionId = cookiesObject.sessionId;
-
-      if (sessionId) {
-        await userLogout(sessionId);
-      }
-    }
-
-    res.writeHead(204, {
-      "Set-Cookie": [
-        "sessionId=; HttpOnly; Max-Age=0",
-        "refreshToken=; HttpOnly; Max-Age=0",
-      ],
-      "Content-Type": "application/json",
-    });
-
-    res.end();
+    res.writeHead(204, { "Content-Type": "application/json" });
+    return res.end(
+      JSON.stringify({
+        status: 204,
+        message: "Successfully logged out",
+      })
+    );
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json" });
     return res.end(
@@ -165,52 +205,115 @@ export async function logoutUserController(req, res) {
 }
 
 const setupSession = (res, session) => {
-  res.setHeader("Set-Cookie", [
-    `refreshToken=${session.refreshToken}; HttpOnly; Expires=${new Date(
-      Date.now() + ONE_DAY
-    ).toUTCString()}`,
-    `sessionId=${session._id}; HttpOnly; Expires=${new Date(
-      Date.now() + ONE_DAY
-    ).toUTCString()}`,
+  console.log("🚀 ~ setupSession ~ session:", session);
+  setCookie(res, [
+    {
+      name: "refreshToken",
+      value: session.refreshToken,
+      options: {
+        HttpOnly: true,
+        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
+      },
+    },
+    {
+      name: "sessionId",
+      value: session.sessionId,
+      options: {
+        HttpOnly: true,
+        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
+      },
+    },
+    {
+      name: "userId",
+      value: session.userId,
+      options: {
+        HttpOnly: true,
+        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
+      },
+    },
   ]);
 };
 
 export async function refreshUserSessionController(req, res) {
   try {
     const cookies = parseCookies(req);
+    console.log("Cookies parsed:", cookies);
 
-    const { sessionId, refreshToken } = cookies;
+    const { userId, refreshToken, sessionId } = cookies;
 
-    const session = await refreshUsersSession(req, res, {
-      sessionId: sessionId,
-      refreshToken: refreshToken,
-    });
-
-    if (!sessionId || !refreshToken) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      return res.end(JSON.stringify({ message: "Session or token missing" }));
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new Error(`Invalid userId format: ${userId}`);
     }
 
-    setupSession(res, session);
+    console.log(
+      "🚀 ~ refreshUserSessionController ~ userId:",
+      userId,
+      refreshToken,
+      sessionId
+    );
+
+    console.log(
+      "🚀 ~ refreshUserSessionController ~ userId, refreshToken:",
+      userId,
+      refreshToken,
+      sessionId
+    );
+
+    if (!userId || !refreshToken || !sessionId) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ message: "UserId or token missing" }));
+    }
+
+    const session = await refreshUsersSession(req, res, {
+      userId: userId,
+      refreshToken: refreshToken,
+      sessionId: sessionId,
+    });
+
+    console.log("Looking for session with:", {
+      userId,
+      refreshToken,
+      sessionId,
+    });
+
+    if (!session) {
+      console.error("No session found for userId:", userId);
+    } else {
+      console.log("----Found session:", session);
+    }
+
+    const user = await UsersCollection.findOne({ _id: userId });
+
+    if (!user) {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify({ message: "User not found" }));
+    }
+
+    const result = setupSession(res, session);
+    console.log("🚀 ~ refreshUserSessionController ~ result:", result);
 
     res.writeHead(201, { "Content-Type": "application/json" });
     return res.end(
       JSON.stringify({
         status: 200,
         message: "Successfully  refreshed a session!",
-        data: {
-          accessToken: session.accessToken,
+        user: {
+          name: user.name,
+          email: user.email,
         },
+        token: session.accessToken,
       })
     );
   } catch (error) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    return res.end(
-      JSON.stringify({
-        status: 500,
-        message: "Internal Server Error",
-        error: error.message,
-      })
-    );
+    if (!res.headersSent) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({
+          status: 500,
+          message: "Internal Server Error",
+          error: error.message,
+        })
+      );
+    }
   }
 }
