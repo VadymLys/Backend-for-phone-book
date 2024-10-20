@@ -12,6 +12,7 @@ import { parseCookies } from "../utils/parseCookies.js";
 import jwt from "jsonwebtoken";
 import { setCookie } from "../utils/setCookie.js";
 import mongoose from "mongoose";
+import { setupSession } from "../utils/sessionFunciones.js";
 
 export async function registerUserController(req, res) {
   try {
@@ -44,14 +45,12 @@ export async function registerUserController(req, res) {
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
-      console.log("🚀 ~ registerUserController ~ token :", token);
 
       res.setHeader("Set-Cookie", [
         `accessToken=${token}; HttpOnly; Max-Age=${FIFTEEN_MINUTES}`,
       ]);
 
       res.writeHead(201, { "Content-Type": "application/json" });
-      console.log(savedUser);
       return res.end(
         JSON.stringify({
           status: 201,
@@ -95,7 +94,6 @@ export async function loginUserController(req, res) {
     }
 
     const session = await userLogin(req, res, { email, password });
-    console.log("🚀 ~ loginUserController ~ session:", session);
 
     if (!session) {
       res.writeHead(401, { "Content-Type": "application/json" });
@@ -107,7 +105,7 @@ export async function loginUserController(req, res) {
       );
     }
 
-    const { accessToken, refreshToken, sessionId } = session;
+    const { accessToken, refreshToken, sessionId, userId } = session;
 
     setCookie(res, [
       {
@@ -115,7 +113,7 @@ export async function loginUserController(req, res) {
         value: accessToken,
         options: {
           HttpOnly: true,
-          MaxAge: ONE_DAY,
+          MaxAge: FIFTEEN_MINUTES,
         },
       },
       {
@@ -134,12 +132,15 @@ export async function loginUserController(req, res) {
           MaxAge: ONE_DAY,
         },
       },
+      {
+        name: "userId",
+        value: userId,
+        options: {
+          HttpOnly: true,
+          MaxAge: ONE_DAY,
+        },
+      },
     ]);
-
-    console.log(
-      "🚀 ~ loginUserController ~ session.refreshToken:",
-      refreshToken
-    );
 
     res.writeHead(201, { "Content-Type": "application/json" });
     return res.end(
@@ -204,60 +205,15 @@ export async function logoutUserController(req, res) {
   }
 }
 
-const setupSession = (res, session) => {
-  console.log("🚀 ~ setupSession ~ session:", session);
-  setCookie(res, [
-    {
-      name: "refreshToken",
-      value: session.refreshToken,
-      options: {
-        HttpOnly: true,
-        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
-      },
-    },
-    {
-      name: "sessionId",
-      value: session.sessionId,
-      options: {
-        HttpOnly: true,
-        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
-      },
-    },
-    {
-      name: "userId",
-      value: session.userId,
-      options: {
-        HttpOnly: true,
-        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
-      },
-    },
-  ]);
-};
-
 export async function refreshUserSessionController(req, res) {
   try {
     const cookies = parseCookies(req);
-    console.log("Cookies parsed:", cookies);
 
     const { userId, refreshToken, sessionId } = cookies;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error(`Invalid userId format: ${userId}`);
     }
-
-    console.log(
-      "🚀 ~ refreshUserSessionController ~ userId:",
-      userId,
-      refreshToken,
-      sessionId
-    );
-
-    console.log(
-      "🚀 ~ refreshUserSessionController ~ userId, refreshToken:",
-      userId,
-      refreshToken,
-      sessionId
-    );
 
     if (!userId || !refreshToken || !sessionId) {
       res.writeHead(400, { "Content-Type": "application/json" });
@@ -270,18 +226,6 @@ export async function refreshUserSessionController(req, res) {
       sessionId: sessionId,
     });
 
-    console.log("Looking for session with:", {
-      userId,
-      refreshToken,
-      sessionId,
-    });
-
-    if (!session) {
-      console.error("No session found for userId:", userId);
-    } else {
-      console.log("----Found session:", session);
-    }
-
     const user = await UsersCollection.findOne({ _id: userId });
 
     if (!user) {
@@ -290,7 +234,6 @@ export async function refreshUserSessionController(req, res) {
     }
 
     const result = setupSession(res, session);
-    console.log("🚀 ~ refreshUserSessionController ~ result:", result);
 
     res.writeHead(201, { "Content-Type": "application/json" });
     return res.end(

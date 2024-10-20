@@ -5,6 +5,7 @@ const sessionsSchema = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
+      required: true,
     },
     accessToken: { type: String, required: true },
     refreshToken: { type: String, required: true },

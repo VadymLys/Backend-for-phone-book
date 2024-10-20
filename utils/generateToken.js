@@ -10,7 +10,6 @@ export function getUserIdFromToken(token) {
 
     const secret = env("JWT_SECRET");
     const decodedToken = jwt.decode(token, secret);
-    console.log("🚀 ~ getUserIdFromToken ~ decodedToken:", decodedToken);
 
     return decodedToken.userId;
   } catch (error) {
