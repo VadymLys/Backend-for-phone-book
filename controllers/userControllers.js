@@ -53,7 +53,7 @@ export async function registerUserController(req, res) {
       );
 
       res.setHeader("Set-Cookie", [
-        `refreshToken=${refreshToken}; HttpOnly; Max-Age=${86400}; SameSite=None; Secure`,
+        `refreshToken=${refreshToken}; HttpOnly; Max-Age=${86400}; SameSite=None; Secure=true`,
       ]);
 
       res.writeHead(201, { "Content-Type": "application/json" });

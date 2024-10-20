@@ -42,6 +42,7 @@ export async function userLogin(req, res, payload) {
     }
 
     const isEqual = await bcrypt.compare(payload.password, user.password);
+    console.log(isEqual);
 
     if (!isEqual) {
       return console.error("isEqual is not found");
