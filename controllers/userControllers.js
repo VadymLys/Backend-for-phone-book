@@ -43,11 +43,17 @@ export async function registerUserController(req, res) {
           email: savedUser.email,
         },
         process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "15m" }
+      );
+
+      const refreshToken = jwt.sign(
+        { userId: savedUser._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
       );
 
       res.setHeader("Set-Cookie", [
-        `accessToken=${token}; HttpOnly; Max-Age=${FIFTEEN_MINUTES}`,
+        `refreshToken=${refreshToken}; HttpOnly; Max-Age=${86400}; SameSite=None; Secure`,
       ]);
 
       res.writeHead(201, { "Content-Type": "application/json" });
@@ -109,19 +115,13 @@ export async function loginUserController(req, res) {
 
     setCookie(res, [
       {
-        name: "accessToken",
-        value: accessToken,
-        options: {
-          HttpOnly: true,
-          MaxAge: FIFTEEN_MINUTES,
-        },
-      },
-      {
         name: "refreshToken",
         value: refreshToken,
         options: {
           HttpOnly: true,
           MaxAge: ONE_DAY,
+          SameSite: "None",
+          Secure: true,
         },
       },
       {
@@ -130,6 +130,8 @@ export async function loginUserController(req, res) {
         options: {
           HttpOnly: true,
           MaxAge: ONE_DAY,
+          SameSite: "None",
+          Secure: true,
         },
       },
       {
@@ -138,6 +140,8 @@ export async function loginUserController(req, res) {
         options: {
           HttpOnly: true,
           MaxAge: ONE_DAY,
+          SameSite: "None",
+          Secure: true,
         },
       },
     ]);
@@ -176,11 +180,6 @@ export async function logoutUserController(req, res) {
       },
       {
         name: "refreshToken",
-        value: "",
-        options: { MaxAge: 0, HttpOnly: true },
-      },
-      {
-        name: "accessToken",
         value: "",
         options: { MaxAge: 0, HttpOnly: true },
       },
