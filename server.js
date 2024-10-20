@@ -12,10 +12,7 @@ import {
 } from "./controllers/userControllers.js";
 import { findAvailablePort } from "./utils/findDesiredPort.js";
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://goit-react-hw-08-phi-six.vercel.app",
-];
+const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
 const setCORSHeaders = (req, res) => {
   const origin = req.headers.origin;
