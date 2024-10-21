@@ -51,6 +51,7 @@ export function setupSession(res, session) {
 export function updateSessionFields(session, newSession) {
   session.accessToken = newSession.accessToken;
   session.refreshToken = newSession.refreshToken;
+  session.accessTokenValidUntil = newSession.accessTokenValidUntil;
   session.refreshTokenValidUntil = newSession.refreshTokenValidUntil;
   session.sessionId = newSession.sessionId;
   session.userId = newSession.userId;
