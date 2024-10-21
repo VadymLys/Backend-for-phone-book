@@ -52,8 +52,17 @@ export async function registerUserController(req, res) {
         { expiresIn: "1d" }
       );
 
-      res.setHeader("Set-Cookie", [
-        `refreshToken=${refreshToken}; HttpOnly; Max-Age=${86400}; SameSite=None; Secure=true`,
+      setCookie(res, [
+        {
+          name: "refreshToken",
+          value: refreshToken,
+          options: {
+            HttpOnly: true,
+            MaxAge: 86400,
+            SameSite: "None",
+            Secure: true,
+          },
+        },
       ]);
 
       res.writeHead(201, { "Content-Type": "application/json" });
@@ -176,12 +185,17 @@ export async function logoutUserController(req, res) {
       {
         name: "sessionId",
         value: "",
-        options: { MaxAge: 0, HttpOnly: true },
+        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
       },
       {
         name: "refreshToken",
         value: "",
-        options: { MaxAge: 0, HttpOnly: true },
+        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
+      },
+      {
+        name: "userId",
+        value: "",
+        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
       },
     ]);
 

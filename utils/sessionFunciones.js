@@ -49,13 +49,11 @@ export function setupSession(res, session) {
 }
 
 export function updateSessionFields(session, newSession) {
-  return {
-    ...session,
-    accessToken: newSession.accessToken,
-    refreshToken: newSession.refreshToken,
-    accessTokenValidUntil: newSession.accessTokenValidUntil,
-    refreshTokenValidUntil: newSession.refreshTokenValidUntil,
-    sessionId: newSession.sessionId,
-    userId: newSession.userId,
-  };
+  session.accessToken = newSession.accessToken;
+  session.refreshToken = newSession.refreshToken;
+  session.refreshTokenValidUntil = newSession.refreshTokenValidUntil;
+  session.sessionId = newSession.sessionId;
+  session.userId = newSession.userId;
+
+  return session;
 }
