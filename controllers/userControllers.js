@@ -207,8 +207,15 @@ export async function logoutUserController(req, res) {
 export async function refreshUserSessionController(req, res) {
   try {
     const cookies = parseCookies(req);
+    console.log("🚀 ~ refreshUserSessionController ~ cookies:", cookies);
 
     const { userId, refreshToken, sessionId } = cookies;
+    console.log("🚀 ~ refreshUserSessionController ~ sessionId:", sessionId);
+    console.log(
+      "🚀 ~ refreshUserSessionController ~ refreshToken:",
+      refreshToken
+    );
+    console.log("🚀 ~ refreshUserSessionController ~ userId:", userId);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error(`Invalid userId format: ${userId}`);
@@ -224,6 +231,7 @@ export async function refreshUserSessionController(req, res) {
       refreshToken: refreshToken,
       sessionId: sessionId,
     });
+    console.log("🚀 ~ refreshUserSessionController ~ session:", session);
 
     const user = await UsersCollection.findOne({ _id: userId });
 
@@ -232,7 +240,7 @@ export async function refreshUserSessionController(req, res) {
       return res.end(JSON.stringify({ message: "User not found" }));
     }
 
-    const result = setupSession(res, session);
+    setupSession(res, session);
 
     res.writeHead(201, { "Content-Type": "application/json" });
     return res.end(

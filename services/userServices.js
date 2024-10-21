@@ -45,10 +45,14 @@ export async function userLogin(req, res, payload) {
     console.log(isEqual);
 
     if (!isEqual) {
-      return console.error("isEqual is not found");
+      console.error("Incorrect password");
+      res.writeHead(401, { "Content-Type": "application/json" });
+      return res.end(
+        JSON.stringify({ status: 401, message: "Invalid credentials" })
+      );
     }
 
-    const result = await SessionsCollection.deleteOne({ userId: user._id });
+    await SessionsCollection.deleteOne({ userId: user._id });
 
     const newSession = createSession(user._id);
 
@@ -95,11 +99,17 @@ export async function refreshUsersSession(
   res,
   { userId, refreshToken, sessionId }
 ) {
+  console.log("🚀 ~ sessionId :", sessionId);
+  console.log("🚀 ~ refreshToken:", refreshToken);
+  console.log("🚀 ~ userId:", userId);
+
   const session = await SessionsCollection.findOne({
     userId: userId,
     refreshToken: refreshToken,
     sessionId: sessionId,
   });
+
+  console.log("🚀 ~ session:", session);
 
   if (!session) {
     res.writeHead(401, { "Content-Type": "application/json" });
@@ -125,13 +135,19 @@ export async function refreshUsersSession(
   }
 
   const newSession = createSession(userId);
+  console.log("🚀 ~ newSession:", newSession);
 
   if (session) {
     updateSessionFields(session, newSession);
     await session.save();
   }
 
-  return session;
+  return {
+    accessToken: newSession.accessToken,
+    refreshToken: newSession.refreshToken,
+    sessionId: newSession.sessionId,
+    userId: userId,
+  };
 }
 
 export async function requestResetToken(req, res, email) {
