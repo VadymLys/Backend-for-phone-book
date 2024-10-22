@@ -15,6 +15,7 @@ export function createSession(userId) {
     accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
     refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
   };
+  console.log("🚀 ~ createSession ~ session :", session);
 
   return session;
 }
@@ -27,6 +28,8 @@ export function setupSession(res, session) {
       options: {
         HttpOnly: true,
         Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
+        Secure: true,
+        SameSite: "None",
       },
     },
     {
@@ -35,6 +38,8 @@ export function setupSession(res, session) {
       options: {
         HttpOnly: true,
         MaxAge: ONE_DAY,
+        Secure: true,
+        SameSite: "None",
       },
     },
     {
@@ -43,12 +48,16 @@ export function setupSession(res, session) {
       options: {
         HttpOnly: true,
         MaxAge: ONE_DAY,
+        Secure: true,
+        SameSite: "None",
       },
     },
   ]);
 }
 
 export function updateSessionFields(session, newSession) {
+  console.log("🚀 ~ updateSessionFields ~ newSession:", newSession);
+  console.log("🚀 ~ updateSessionFields ~ session:", session);
   session.accessToken = newSession.accessToken;
   session.refreshToken = newSession.refreshToken;
   session.accessTokenValidUntil = newSession.accessTokenValidUntil;
