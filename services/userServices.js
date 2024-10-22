@@ -55,16 +55,18 @@ export async function userLogin(req, res, payload) {
     await SessionsCollection.deleteOne({ userId: user._id });
 
     const newSession = createSession(user._id);
+    console.log("🚀 ~ userLogin ~ newSession:", newSession);
 
     const session = await SessionsCollection.create(
       updateSessionFields({}, newSession)
     );
+    console.log("🚀 ~ userLogin ~ session :", session);
 
     const userSession = {
       ...session.toObject(),
       name: user.name,
     };
-
+    console.log("🚀 ~ userLogin ~ userSession :", userSession);
     return userSession;
   } catch (err) {
     console.error("Error during user login:", err.message);
