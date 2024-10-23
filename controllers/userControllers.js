@@ -61,6 +61,8 @@ export async function registerUserController(req, res) {
             MaxAge: 86400,
             SameSite: "None",
             Secure: true,
+            Domain: "backend-for-phone-book.onrender.com",
+            Path: "/",
           },
         },
       ]);
@@ -131,6 +133,8 @@ export async function loginUserController(req, res) {
           MaxAge: ONE_DAY,
           SameSite: "None",
           Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
         },
       },
       {
@@ -141,6 +145,8 @@ export async function loginUserController(req, res) {
           MaxAge: ONE_DAY,
           SameSite: "None",
           Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
         },
       },
       {
@@ -151,6 +157,8 @@ export async function loginUserController(req, res) {
           MaxAge: ONE_DAY,
           SameSite: "None",
           Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
         },
       },
     ]);
@@ -185,17 +193,38 @@ export async function logoutUserController(req, res) {
       {
         name: "sessionId",
         value: "",
-        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
+        options: {
+          MaxAge: 0,
+          HttpOnly: true,
+          SameSite: "None",
+          Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
+        },
       },
       {
         name: "refreshToken",
         value: "",
-        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
+        options: {
+          MaxAge: 0,
+          HttpOnly: true,
+          SameSite: "None",
+          Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
+        },
       },
       {
         name: "userId",
         value: "",
-        options: { MaxAge: 0, HttpOnly: true, SameSite: "None", Secure: true },
+        options: {
+          MaxAge: 0,
+          HttpOnly: true,
+          SameSite: "None",
+          Secure: true,
+          Domain: "backend-for-phone-book.onrender.com",
+          Path: "/",
+        },
       },
     ]);
 

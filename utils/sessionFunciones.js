@@ -27,9 +27,11 @@ export function setupSession(res, session) {
       value: session.refreshToken,
       options: {
         HttpOnly: true,
-        Expires: new Date(Date.now() + ONE_DAY).toUTCString(),
+        MaxAge: ONE_DAY,
         Secure: true,
         SameSite: "None",
+        Domain: "backend-for-phone-book.onrender.com",
+        Path: "/",
       },
     },
     {
@@ -40,6 +42,8 @@ export function setupSession(res, session) {
         MaxAge: ONE_DAY,
         Secure: true,
         SameSite: "None",
+        Domain: "backend-for-phone-book.onrender.com",
+        Path: "/",
       },
     },
     {
@@ -50,6 +54,8 @@ export function setupSession(res, session) {
         MaxAge: ONE_DAY,
         Secure: true,
         SameSite: "None",
+        Domain: "backend-for-phone-book.onrender.com",
+        Path: "/",
       },
     },
   ]);
