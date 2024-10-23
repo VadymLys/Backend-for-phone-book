@@ -258,7 +258,12 @@ export async function refreshUserSessionController(req, res) {
       "🚀 ~ refreshUserSessionController ~ refreshToken:",
       refreshToken
     );
-    console.log("🚀 ~ refreshUserSessionController ~ userId:", userId);
+    console.log(
+      "🚀 ~ refreshUserSessionController ~ userId:",
+      userId,
+      "type of userId",
+      typeof userId
+    );
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error(`Invalid userId format: ${userId}`);

@@ -103,7 +103,7 @@ export async function refreshUsersSession(
 ) {
   console.log("🚀 ~ sessionId :", sessionId);
   console.log("🚀 ~ refreshToken:", refreshToken);
-  console.log("🚀 ~ userId:", userId);
+  console.log("🚀 ~ userId:", userId, "type of userId", typeof userId);
 
   const session = await SessionsCollection.findOne({
     userId: userId,

@@ -7,8 +7,8 @@ export function setCookie(res, cookies) {
     if (options.SameSite) cookieParts.push(`SameSite=${options.SameSite}`);
     if (options.Expires) cookieParts.push(`Expires=${options.Expires}`);
     if (options.MaxAge) cookieParts.push(`Max-Age=${options.MaxAge}`);
-    if (options.Domain) cookieParts.push(`Domain=${options.domain}`);
-    if (options.Path) cookieParts.push(`Path=${options.path}`);
+    if (options.Domain) cookieParts.push(`Domain=${options.Domain}`);
+    if (options.Path) cookieParts.push(`Path=${options.Path}`);
 
     return cookieParts.join("; ");
   });
