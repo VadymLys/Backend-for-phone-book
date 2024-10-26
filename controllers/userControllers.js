@@ -111,6 +111,7 @@ export async function loginUserController(req, res) {
     }
 
     const session = await userLogin(req, res, { email, password });
+    console.log("🚀 ~ loginUserController ~ session:", session);
 
     if (!session) {
       res.writeHead(401, { "Content-Type": "application/json" });
@@ -252,7 +253,7 @@ export async function refreshUserSessionController(req, res) {
     const cookies = parseCookies(req);
     console.log("🚀 ~ refreshUserSessionController ~ cookies:", cookies);
 
-    const { userId, refreshToken, sessionId } = cookies;
+    const { refreshToken, sessionId, userId } = cookies;
     console.log("🚀 ~ refreshUserSessionController ~ sessionId:", sessionId);
     console.log(
       "🚀 ~ refreshUserSessionController ~ refreshToken:",
@@ -264,6 +265,8 @@ export async function refreshUserSessionController(req, res) {
       "type of userId",
       typeof userId
     );
+
+    console.log("🚀 ~ refreshUserSessionController ~ headers:", req.headers);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       throw new Error(`Invalid userId format: ${userId}`);

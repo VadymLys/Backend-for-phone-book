@@ -93,7 +93,10 @@ export async function getUserById(userId) {
 }
 
 export async function userLogout(payload) {
-  await SessionsCollection.deleteOne({ sessionId: payload.sessionId });
+  const result = await SessionsCollection.deleteOne({
+    sessionId: payload.sessionId,
+  });
+  return result.deletedCount > 0;
 }
 
 export async function refreshUsersSession(
@@ -148,7 +151,7 @@ export async function refreshUsersSession(
     accessToken: newSession.accessToken,
     refreshToken: newSession.refreshToken,
     sessionId: newSession.sessionId,
-    userId: userId,
+    userId: newSession.userId,
   };
 }
 
