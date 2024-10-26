@@ -58,7 +58,7 @@ export async function registerUserController(req, res) {
           value: refreshToken,
           options: {
             HttpOnly: true,
-            MaxAge: 86400,
+            MaxAge: ONE_DAY,
             SameSite: "None",
             Secure: true,
             Domain: "backend-for-phone-book.onrender.com",

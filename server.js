@@ -11,6 +11,7 @@ import {
   registerUserController,
 } from "./controllers/userControllers.js";
 import { findAvailablePort } from "./utils/findDesiredPort.js";
+import { serveAcmeChallenge } from "./utils/acme.js";
 
 const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
@@ -26,10 +27,13 @@ const setCORSHeaders = (req, res) => {
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Accept"
+  );
 
   if (req.method === "OPTIONS") {
-    res.writeHead(204);
+    res.writeHead(204, { "Content-Type": "text/plain" });
     res.end();
     return true;
   }
@@ -41,6 +45,10 @@ export const startServer = () => {
     const handledCors = setCORSHeaders(req, res);
 
     if (handledCors) {
+      return;
+    }
+
+    if (serveAcmeChallenge(req, res)) {
       return;
     }
 
