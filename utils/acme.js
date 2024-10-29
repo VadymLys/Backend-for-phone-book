@@ -1,44 +1,29 @@
 import fs from "fs";
 import path from "path";
 
-const __dirname = path
-  .dirname(new URL(import.meta.url).pathname)
-  .replace(/^\/([a-zA-Z]):\//, "$1:/");
+const ACME_DIR = path.join(process.cwd(), ".well-known", "acme-challenge");
 
-export function serveAcmeChallenge(req, res) {
-  const acmePath = "/.well-known/acme-challenge";
-  if (req.url.startsWith(acmePath)) {
-    const challengeFile = req.url.slice(acmePath.length + 1);
-    console.log("🚀 ~ serveAcmeChallenge ~ challengeFile:", challengeFile);
-    const filePath = path.join(
-      __dirname,
-      "..",
-      ".well-known",
-      "acme-challenge",
-      challengeFile
-    );
+export async function serveAcmeChallenge(req, res) {
+  if (
+    req.method === "GET" &&
+    req.url.startsWith("/.well-known/acme-challenge/")
+  ) {
+    const token = req.url.split("/").pop();
+    const filePath = path.join(ACME_DIR, token);
     console.log("🚀 ~ serveAcmeChallenge ~ filePath:", filePath);
 
-    console.log("Requesting file path:", filePath);
+    try {
+      await fs.promises.access(filePath, fs.constants.R_OK);
+      const keyAuthorization = await fs.promises.readFile(filePath, "utf-8");
 
-    const testFilePath = path.join(__dirname, "../.well-known/acme-challenge");
-
-    fs.access(testFilePath, fs.constants.R_OK, (err) => {
-      if (err) {
-        console.error("No read access to the file:", testFilePath);
-      } else {
-        console.log("Read access confirmed for file:", testFilePath);
-      }
-    });
-
-    if (fs.existsSync(filePath)) {
       res.writeHead(200, { "Content-Type": "text/plain" });
-      fs.createReadStream(filePath).pipe(res);
-    } else {
-      res.writeHead(404);
+      res.end(keyAuthorization);
+      return;
+    } catch (error) {
+      res.writeHead(404, { "Content-Type": "text/plain" });
       res.end("Not Found");
+      return;
     }
-    return true;
   }
   return false;
 }
