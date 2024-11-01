@@ -1,5 +1,9 @@
 import fs from "fs";
 import https from "https";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import {
   createContactController,
   deleteContactController,
@@ -41,20 +45,11 @@ const setCORSHeaders = (req, res) => {
 };
 
 export const startServer = () => {
-  const privateKey = fs.readFileSync(
-    "./certificates/backend-for-phone-book.onrender.com-key.pem",
-    "utf-8"
-  );
+  const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, "utf-8");
 
-  const certificate = fs.readFileSync(
-    "./certificates/backend-for-phone-book.onrender.com-crt.pem",
-    "utf-8"
-  );
+  const certificate = fs.readFileSync(process.env.CERTIFICATE_PATH, "utf-8");
 
-  const ca = fs.readFileSync(
-    "./certificates/backend-for-phone-book.onrender.com-chain.pem",
-    "utf-8"
-  );
+  const ca = fs.readFileSync(process.env.CA_PATH, "utf-8");
 
   const credentials = {
     key: privateKey,
