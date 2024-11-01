@@ -1,4 +1,5 @@
-import http from "http";
+import fs from "fs";
+import https from "https";
 import {
   createContactController,
   deleteContactController,
@@ -11,7 +12,6 @@ import {
   registerUserController,
 } from "./controllers/userControllers.js";
 import { findAvailablePort } from "./utils/findDesiredPort.js";
-import { serveAcmeChallenge } from "./utils/acme.js";
 
 const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
@@ -41,14 +41,31 @@ const setCORSHeaders = (req, res) => {
 };
 
 export const startServer = () => {
-  const server = http.createServer((req, res) => {
+  const privateKey = fs.readFileSync(
+    "./certificates/backend-for-phone-book.onrender.com-key.pem",
+    "utf-8"
+  );
+
+  const certificate = fs.readFileSync(
+    "./certificates/backend-for-phone-book.onrender.com-crt.pem",
+    "utf-8"
+  );
+
+  const ca = fs.readFileSync(
+    "./certificates/backend-for-phone-book.onrender.com-chain.pem",
+    "utf-8"
+  );
+
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: ca,
+  };
+
+  const server = https.createServer(credentials, (req, res) => {
     const handledCors = setCORSHeaders(req, res);
 
     if (handledCors) {
-      return;
-    }
-
-    if (serveAcmeChallenge(req, res)) {
       return;
     }
 
@@ -79,10 +96,10 @@ export const startServer = () => {
     }
   });
 
-  const desiredPort = process.env.PORT || 3000;
+  const desiredPort = process.env.PORT || 443;
   findAvailablePort(desiredPort).then((port) => {
     server.listen(port, () => {
-      console.log(`server listening on port http://localhost:${port}`);
+      console.log(`server listening on port https://localhost:${port}`);
     });
   });
 };
