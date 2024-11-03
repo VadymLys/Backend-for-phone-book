@@ -45,11 +45,20 @@ const setCORSHeaders = (req, res) => {
 };
 
 export const startServer = () => {
-  const privateKey = fs.readFileSync(process.env.PRIVATE_KEY_PATH, "utf-8");
+  const privateKey = fs.readFileSync(
+    path.resolve(process.cwd(), process.env.PRIVATE_KEY_PATH),
+    "utf-8"
+  );
 
-  const certificate = fs.readFileSync(process.env.CERTIFICATE_PATH, "utf-8");
+  const certificate = fs.readFileSync(
+    path.resolve(process.cwd(), process.env.CERTIFICATE_PATH),
+    "utf-8"
+  );
 
-  const ca = fs.readFileSync(process.env.CA_PATH, "utf-8");
+  const ca = fs.readFileSync(
+    path.resolve(process.cwd(), process.env.CA_PATH),
+    "utf-8"
+  );
 
   const credentials = {
     key: privateKey,
