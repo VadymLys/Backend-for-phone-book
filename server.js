@@ -1,8 +1,7 @@
 import fs from "fs";
 import https from "https";
 import dotenv from "dotenv";
-
-dotenv.config();
+import path from "path";
 
 import {
   createContactController,
@@ -16,6 +15,8 @@ import {
   registerUserController,
 } from "./controllers/userControllers.js";
 import { findAvailablePort } from "./utils/findDesiredPort.js";
+
+dotenv.config();
 
 const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
