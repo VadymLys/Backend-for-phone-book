@@ -7,20 +7,22 @@ import {
   createContactController,
   deleteContactController,
   getContactsController,
-} from "./controllers/contactController.js";
+} from "./src/controllers/contactController.js";
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
-} from "./controllers/userControllers.js";
-import { findAvailablePort } from "./utils/findDesiredPort.js";
+} from "./src/controllers/userControllers.js";
+import { findAvailablePort } from "./src/utils/findDesiredPort.js";
+import { downloadCertificate } from "./src/utils/certificatesFromS3.js";
+import { __dirname } from "./src/constants/index.js";
 
 dotenv.config();
 
 const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
 
-const setCORSHeaders = (req, res) => {
+function setCORSHeaders(req, res) {
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
@@ -43,21 +45,27 @@ const setCORSHeaders = (req, res) => {
     return true;
   }
   return false;
-};
+}
 
-export const startServer = () => {
+export async function startServer() {
+  const bucketName = process.env.BUCKET_NAME;
+
+  await downloadCertificate(bucketName, process.env.PRIVATE_KEY_PATH);
+  await downloadCertificate(bucketName, process.env.CERTIFICATE_PATH);
+  await downloadCertificate(bucketName, process.env.CA_PATH);
+
   const privateKey = fs.readFileSync(
-    path.resolve(process.cwd(), process.env.PRIVATE_KEY_PATH),
+    path.resolve(__dirname, process.env.PRIVATE_KEY_PATH),
     "utf-8"
   );
 
   const certificate = fs.readFileSync(
-    path.resolve(process.cwd(), process.env.CERTIFICATE_PATH),
+    path.resolve(__dirname, process.env.CERTIFICATE_PATH),
     "utf-8"
   );
 
   const ca = fs.readFileSync(
-    path.resolve(process.cwd(), process.env.CA_PATH),
+    path.resolve(__dirname, process.env.CA_PATH),
     "utf-8"
   );
 
@@ -107,4 +115,4 @@ export const startServer = () => {
       console.log(`server listening on port https://localhost:${port}`);
     });
   });
-};
+}
