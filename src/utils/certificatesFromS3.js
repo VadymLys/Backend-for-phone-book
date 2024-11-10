@@ -2,7 +2,7 @@ import fs from "fs";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import path from "path";
 import dotenv from "dotenv";
-import { certsDir } from "../constants/index.js";
+import { certsDir, isRender } from "../constants/index.js";
 
 dotenv.config();
 
@@ -16,7 +16,7 @@ const s3Client = new S3Client({
 
 export async function downloadCertificate(bucketName, key) {
   if (!fs.existsSync(certsDir)) {
-    console.error("🚀 ~ downloadCertificate ~ dirPath:", certsDir);
+    fs.mkdirSync(certsDir, { recursive: true });
   }
 
   const filePath = path.resolve(certsDir, path.basename(key));
@@ -35,7 +35,19 @@ export async function downloadCertificate(bucketName, key) {
       response.Body.pipe(fileStream)
         .on("finish", () => {
           console.log(`Файл ${key} успішно завантажено`);
-          resolve();
+          resolve(filePath);
+
+          if (isRender) {
+            try {
+              fs.rmSync(certsDir, { recursive: true, force: true });
+              console.log("Тимчасова директорія успішно видалена");
+            } catch (err) {
+              console.error(
+                "Помилка при видаленні тимчасової директорії:",
+                err
+              );
+            }
+          }
         })
         .on("error", (err) => {
           console.error(`Помилка при записі файлу ${key}:`, err);
