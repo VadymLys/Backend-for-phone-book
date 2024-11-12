@@ -3,6 +3,7 @@
 
 
 .env
+.env.test
 certificates/
 .well-known/
 

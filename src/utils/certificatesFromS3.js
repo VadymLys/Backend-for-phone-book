@@ -36,18 +36,6 @@ export async function downloadCertificate(bucketName, key) {
         .on("finish", () => {
           console.log(`Файл ${key} успішно завантажено`);
           resolve(filePath);
-
-          if (isRender) {
-            try {
-              fs.rmSync(certsDir, { recursive: true, force: true });
-              console.log("Тимчасова директорія успішно видалена");
-            } catch (err) {
-              console.error(
-                "Помилка при видаленні тимчасової директорії:",
-                err
-              );
-            }
-          }
         })
         .on("error", (err) => {
           console.error(`Помилка при записі файлу ${key}:`, err);
@@ -57,5 +45,17 @@ export async function downloadCertificate(bucketName, key) {
   } catch (err) {
     console.error("Помилка при завантаженні сертифіката з S3:", err);
     throw err;
+  } finally {
+    if (isRender && fs.existsSync(certsDir)) {
+      try {
+        fs.rmSync(certsDir, { recursive: true, force: true });
+        console.log("Тимчасова директорія успішно видалена на Render");
+      } catch (err) {
+        console.error(
+          "Помилка при видаленні тимчасової директорії на Render:",
+          err
+        );
+      }
+    }
   }
 }
