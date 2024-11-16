@@ -6,13 +6,12 @@ import {
   userLogout,
   userRegistration,
 } from "../services/userServices.js";
-import { getUserIdFromToken } from "../utils/generateToken.js";
 import { getPostData } from "../utils/getPostData.js";
 import { parseCookies } from "../utils/parseCookies.js";
 import jwt from "jsonwebtoken";
 import { setCookie } from "../utils/setCookie.js";
 import mongoose from "mongoose";
-import { setupSession } from "../utils/sessionFunciones.js";
+import { setupSession } from "../utils/sessionFunctions.js";
 
 export async function registerUserController(req, res) {
   try {

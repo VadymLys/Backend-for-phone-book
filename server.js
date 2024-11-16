@@ -1,7 +1,6 @@
-import fs from "fs";
+import fs from "fs/promises";
 import https from "https";
 import dotenv from "dotenv";
-import path from "path";
 
 import {
   createContactController,
@@ -15,8 +14,8 @@ import {
   registerUserController,
 } from "./src/controllers/userControllers.js";
 import { findAvailablePort } from "./src/utils/findDesiredPort.js";
-import { downloadCertificate } from "./src/utils/certificatesFromS3.js";
 import { __dirname } from "./src/constants/index.js";
+import { downloadCertificates } from "./src/utils/functionsAWS/downloadCertificates.js";
 
 dotenv.config();
 
@@ -50,24 +49,20 @@ function setCORSHeaders(req, res) {
 export async function startServer() {
   const bucketName = process.env.BUCKET_NAME;
 
-  await downloadCertificate(bucketName, process.env.PRIVATE_KEY_PATH);
-  await downloadCertificate(bucketName, process.env.CERTIFICATE_PATH);
-  await downloadCertificate(bucketName, process.env.CA_PATH);
-
-  const privateKey = fs.readFileSync(
-    path.resolve(__dirname, process.env.PRIVATE_KEY_PATH),
-    "utf-8"
+  const [privateKeyPath, certificatePath, caPath] = await downloadCertificates(
+    bucketName,
+    [
+      process.env.PRIVATE_KEY_PATH,
+      process.env.CERTIFICATE_PATH,
+      process.env.CA_PATH,
+    ]
   );
 
-  const certificate = fs.readFileSync(
-    path.resolve(__dirname, process.env.CERTIFICATE_PATH),
-    "utf-8"
-  );
+  const privateKey = await fs.readFile(privateKeyPath, "utf-8");
 
-  const ca = fs.readFileSync(
-    path.resolve(__dirname, process.env.CA_PATH),
-    "utf-8"
-  );
+  const certificate = await fs.readFile(certificatePath, "utf-8");
+
+  const ca = await fs.readFile(caPath, "utf-8");
 
   const credentials = {
     key: privateKey,

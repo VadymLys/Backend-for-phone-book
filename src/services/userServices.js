@@ -1,14 +1,11 @@
 import { UsersCollection } from "../db/models/user.js";
 import bcrypt from "bcrypt";
-import { randomBytes } from "crypto";
 import { SessionsCollection } from "../db/models/session.js";
-import { FIFTEEN_MINUTES, ONE_DAY } from "../constants/index.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import {
   createSession,
   updateSessionFields,
-} from "../utils/sessionFunciones.js";
+} from "../utils/sessionFunctions.js";
 
 export async function userRegistration(req, res, payload) {
   const user = await UsersCollection.findOne({ email: payload.email });
