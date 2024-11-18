@@ -16,6 +16,7 @@ import {
 import { findAvailablePort } from "./src/utils/findDesiredPort.js";
 import { __dirname } from "./src/constants/index.js";
 import { downloadCertificates } from "./src/utils/functionsAWS/downloadCertificates.js";
+import { env } from "./src/utils/env.js";
 
 dotenv.config();
 
@@ -47,22 +48,45 @@ function setCORSHeaders(req, res) {
 }
 
 export async function startServer() {
-  const bucketName = process.env.BUCKET_NAME;
+  let privateKey;
+  let certificate;
+  let ca;
 
-  const [privateKeyPath, certificatePath, caPath] = await downloadCertificates(
-    bucketName,
-    [
-      process.env.PRIVATE_KEY_PATH,
-      process.env.CERTIFICATE_PATH,
-      process.env.CA_PATH,
-    ]
-  );
+  const isAWSEnabled = env("ENABLE_AWS") === "true";
 
-  const privateKey = await fs.readFile(privateKeyPath, "utf-8");
+  if (isAWSEnabled) {
+    const bucketName = env("BUCKET_NAME");
 
-  const certificate = await fs.readFile(certificatePath, "utf-8");
+    if (
+      !bucketName ||
+      !env("PRIVATE_KEY_PATH") ||
+      !env("CERTIFICATE_PATH") ||
+      !env("CA_PATH")
+    ) {
+      throw new Error(
+        "One or more required environment variables are missing."
+      );
+    }
 
-  const ca = await fs.readFile(caPath, "utf-8");
+    const [privateKeyPath, certificatePath, caPath] =
+      await downloadCertificates(bucketName, [
+        env("PRIVATE_KEY_PATH"),
+        env("CERTIFICATE_PATH"),
+        env("CA_PATH"),
+      ]);
+
+    privateKey = await fs.readFile(privateKeyPath, "utf-8");
+
+    certificate = await fs.readFile(certificatePath, "utf-8");
+
+    ca = await fs.readFile(caPath, "utf-8");
+  } else {
+    privateKey = env("PRIVATE_KEY");
+
+    certificate = env("CERTIFICATE");
+
+    ca = env("CA");
+  }
 
   const credentials = {
     key: privateKey,
