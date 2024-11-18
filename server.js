@@ -81,11 +81,11 @@ export async function startServer() {
 
     ca = await fs.readFile(caPath, "utf-8");
   } else {
-    privateKey = env("PRIVATE_KEY");
+    privateKey = process.env.PRIVATE_KEY;
 
-    certificate = env("CERTIFICATE");
+    certificate = process.env.CERTIFICATE;
 
-    ca = env("CA");
+    ca = process.env.CA;
   }
 
   const credentials = {
