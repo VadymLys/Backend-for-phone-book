@@ -7,37 +7,31 @@ import { getPostData } from "../utils/getPostData.js";
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 // gets all products
 export async function getContactsController(req, res) {
-  try {
-    const urlParams = new URLSearchParams(req.url.split("?")[1]);
+  const urlParams = new URLSearchParams(req.url.split("?")[1]);
 
-    const paginationParams = parsePaginationParams(
-      Object.fromEntries(urlParams)
-    );
+  const paginationParams = parsePaginationParams(Object.fromEntries(urlParams));
 
-    const { page, perPage } = paginationParams;
+  const { page, perPage } = paginationParams;
 
-    const { contacts, total, ...paginationData } = await findAllContacts(
-      req,
-      res,
-      { page, perPage }
-    );
+  const { contacts, total, ...paginationData } = await findAllContacts(
+    req,
+    res,
+    { page, perPage }
+  );
 
-    res.writeHead(200, { "Content-Type": "application/json" });
+  res.writeHead(200, { "Content-Type": "application/json" });
 
-    res.end(
-      JSON.stringify({
-        status: 200,
-        message: "Successfully found contacts!",
-        data: {
-          contacts,
-          total,
-          pagination: paginationData,
-        },
-      })
-    );
-  } catch (error) {
-    console.log(error.message);
-  }
+  res.end(
+    JSON.stringify({
+      status: 200,
+      message: "Successfully found contacts!",
+      data: {
+        contacts,
+        total,
+        pagination: paginationData,
+      },
+    })
+  );
 }
 
 export async function deleteContactController(req, res, id) {
