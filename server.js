@@ -17,11 +17,12 @@ import { findAvailablePort } from "./src/utils/findDesiredPort.js";
 import { __dirname } from "./src/constants/index.js";
 import { downloadCertificates } from "./src/utils/functionsAWS/downloadCertificates.js";
 import { env } from "./src/utils/env.js";
-import { ctrlWrapper } from "./src/utils/ctrlWrapper.js";
+import ctrlWrapper from "./src/utils/ctrlWrapper.js";
+import { config } from "./config/index.js";
 
 dotenv.config();
 
-const allowedOrigins = ["https://goit-react-hw-08-phi-six.vercel.app"];
+const allowedOrigins = [config.allowedOrigins];
 
 function setCORSHeaders(req, res) {
   const origin = req.headers.origin;
@@ -85,11 +86,12 @@ export async function startServer() {
       ca = await fs.readFile(caPath, "utf-8");
     } else {
       console.log("Downloading certificates from render");
-      privateKey = process.env.PRIVATE_KEY;
 
-      certificate = process.env.CERTIFICATE;
+      privateKey = config.ssl.privateKey;
 
-      ca = process.env.CA;
+      certificate = config.ssl.certfificate;
+
+      ca = config.ssl.ca;
     }
 
     const credentials = {
@@ -104,13 +106,13 @@ export async function startServer() {
       if (handledCors) {
         return;
       }
-
+      const method = req.method;
       const url = req.url.split("?")[0];
 
       if (url === "/contacts" && method === "GET") {
-        ctrlWrapper(getContactsController)(req, res);
+        ctrlWrapper(getContactsController(req, res));
       } else if (url === "/contacts" && method === "POST") {
-        ctrlWrapper(createContactController)(req, res);
+        ctrlWrapper(createContactController(req, res));
       } else if (
         url.match(/^\/contacts\/([a-fA-F0-9]{24})$/) &&
         method === "DELETE"
@@ -118,13 +120,13 @@ export async function startServer() {
         const id = url.split("/")[2];
         ctrlWrapper(deleteContactController)(req, res, id);
       } else if (url === "/users/signup" && method === "POST") {
-        ctrlWrapper(registerUserController)(req, res);
+        ctrlWrapper(registerUserController(req, res));
       } else if (url === "/users/login" && method === "POST") {
-        ctrlWrapper(loginUserController)(req, res);
+        ctrlWrapper(loginUserController(req, res));
       } else if (url === "/users/logout" && method === "POST") {
-        ctrlWrapper(logoutUserController)(req, res);
+        ctrlWrapper(logoutUserController(req, res));
       } else if (url === "/users/current" && method === "GET") {
-        ctrlWrapper(refreshUserSessionController)(req, res);
+        ctrlWrapper(refreshUserSessionController(req, res));
       } else {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Not Found" }));
@@ -142,7 +144,7 @@ export async function startServer() {
         console.error("Error finding available port:", err);
         throw new Error("Failed to find available port.");
       });
-  } catch (error) {
+  } catch (err) {
     console.error("Error starting server:", err);
     process.exit(1);
   }

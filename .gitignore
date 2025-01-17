@@ -6,7 +6,7 @@
 .env.test
 certificates/
 .well-known/
-
+config/
 
 .vscode
 .DS_Store
