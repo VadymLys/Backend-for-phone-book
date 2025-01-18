@@ -8,10 +8,10 @@ export async function downloadCertificates(bucketName, keys) {
     const downloadPromises = keys.map((key) => downloadFile(bucketName, key));
     const filePaths = await Promise.all(downloadPromises);
 
-    console.log("Усі файли успішно завантажено:", filePaths);
+    console.log("All files downloaded successfully", filePaths);
     return filePaths;
   } catch (err) {
-    console.error("Помилка при завантаженні сертифікатів:", err);
+    console.error("An error occurred during file downloads:", err);
     throw err;
   }
 }

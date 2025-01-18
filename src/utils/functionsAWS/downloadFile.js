@@ -10,10 +10,10 @@ export async function downloadFile(bucketName, key) {
 
   try {
     await fs.access(filePath);
-    console.log(`Файл ${key} уже існує, пропускаємо завантаження.`);
+    console.log(`File ${key} already exists, skipping download.`);
     return filePath;
   } catch (err) {
-    console.log(`Файл ${key} не знайдено, починаємо завантаження.`);
+    console.log(`File ${key} not found, starting download.`);
   }
 
   const fileStream = createWriteStream(filePath);
@@ -28,16 +28,16 @@ export async function downloadFile(bucketName, key) {
     return new Promise((resolve, reject) => {
       response.Body.pipe(fileStream)
         .on("finish", () => {
-          console.log(`Файл ${key} успішно завантажено`);
+          console.log(`File ${key} downloaded successfully`);
           resolve(filePath);
         })
         .on("error", (err) => {
-          console.error(`Помилка при записі файлу ${key}:`, err);
+          console.error(`Error writing file ${key}:`, err);
           reject(err);
         });
     });
   } catch (err) {
-    console.error("Помилка при завантаженні сертифіката з S3:", err);
+    console.error("Error downloading certificate from S3:", err);
     throw err;
   }
 }

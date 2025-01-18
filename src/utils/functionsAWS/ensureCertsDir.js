@@ -4,8 +4,8 @@ import { certsDir } from "../../constants/index.js";
 export async function ensureCertsDir() {
   try {
     await fs.mkdir(certsDir, { recursive: true });
-    console.log("Директорія сертифікатів успішно створена:", certsDir);
+    console.log("Certificate directory created successfully:", certsDir);
   } catch (err) {
-    console.error("Помилка створення директорії сертифікатів:", err);
+    console.error("Error creating certificate directory:", err);
   }
 }

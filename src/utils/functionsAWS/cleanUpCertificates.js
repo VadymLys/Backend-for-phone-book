@@ -5,12 +5,9 @@ export async function cleanUpCertificates() {
   if (isRender && (await fs.stat(certsDir).catch(() => false))) {
     try {
       await fs.rm(certsDir, { recursive: true, force: true });
-      console.log("Тимчасова директорія успішно видалена на Render");
+      console.log("The Render directory has been successfully deleted.");
     } catch (err) {
-      console.error(
-        "Помилка при видаленні тимчасової директорії на Render:",
-        err
-      );
+      console.error("An error occurred while deleting the certificates:", err);
     }
   }
 }
