@@ -1,5 +1,5 @@
-import { ContactCollection } from "../db/models/contact.js";
 import {
+  contactCreate,
   deleteContactById,
   findAllContacts,
 } from "../services/contactServices.js";
@@ -58,12 +58,7 @@ export async function createContactController(req, res) {
 
   const { name, phoneNumber } = JSON.parse(body);
 
-  const newContact = new ContactCollection({
-    name,
-    phoneNumber,
-  });
-
-  const savedContact = await newContact.save();
+  const savedContact = await contactCreate({ name, phoneNumber });
 
   res.writeHead(201, { "Content-Type": "application/json" });
   return res.end(

@@ -5,16 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "cross-env NODE_ENV=test mocha --exit",
+    "test": "node --test tests/contacts.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-http": "^4.3.0",
-    "mocha": "^8.2.0",
     "nodemon": "^2.0.5"
   },
   "dependencies": {
