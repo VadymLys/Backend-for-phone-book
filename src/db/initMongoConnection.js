@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 import { config } from "../../config/index.js";
+import { env } from "../utils/env.js";
+import dotenv from "dotenv";
 
-export const initMongoConnection = async () => {
+dotenv.config({ path: ".env.test" });
+
+export async function initMongoConnection() {
   try {
     const {
       db: { user, pwd, url, db },
     } = config;
+    console.log("🚀 ~ initMongoConnection ~ db:", db);
 
     const mongoDBURL = `mongodb+srv://${user}:${pwd}@${url}/${db}?retryWrites=true&w=majority&appName=Cluster0&tls=true`;
 
@@ -15,4 +20,4 @@ export const initMongoConnection = async () => {
     console.log("Error while setting up mongo connection", error.message);
     throw error;
   }
-};
+}
