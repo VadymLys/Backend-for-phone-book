@@ -1,4 +1,3 @@
-import fs from "fs/promises";
 import https from "https";
 import dotenv from "dotenv";
 
@@ -15,89 +14,20 @@ import {
 } from "./src/controllers/userControllers.js";
 import { findAvailablePort } from "./src/utils/findDesiredPort.js";
 import { __dirname } from "./src/constants/index.js";
-import { downloadCertificates } from "./src/utils/functionsAWS/downloadCertificates.js";
-import { env } from "./src/utils/env.js";
 import ctrlWrapper from "./src/utils/ctrlWrapper.js";
-import { config } from "./config/index.js";
+import { setCORSHeaders } from "./src/utils/corsHeaders.js";
+import { flagCertificates } from "./src/utils/certificates.js";
 
 dotenv.config();
 
-const allowedOrigins = [config.allowedOrigins];
-
-function setCORSHeaders(req, res) {
-  const origin = req.headers.origin;
-  const method = req.method;
-
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-  }
-
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Accept"
-  );
-
-  if (method === "OPTIONS") {
-    res.writeHead(204, { "Content-Type": "text/plain" });
-    res.end();
-    return true;
-  }
-  return false;
-}
-
 export async function startServer() {
   try {
-    let privateKey;
-    let certificate;
-    let ca;
-
-    const isAWSEnabled = env("ENABLE_AWS") === "true";
-
-    if (isAWSEnabled) {
-      console.log("Downloading certificates from AWS");
-      const bucketName = env("BUCKET_NAME");
-
-      if (
-        !bucketName ||
-        !env("PRIVATE_KEY_PATH") ||
-        !env("CERTIFICATE_PATH") ||
-        !env("CA_PATH")
-      ) {
-        throw new Error(
-          "One or more required environment variables are missing."
-        );
-      }
-      const [privateKeyPath, certificatePath, caPath] =
-        await downloadCertificates(bucketName, [
-          env("PRIVATE_KEY_PATH"),
-          env("CERTIFICATE_PATH"),
-          env("CA_PATH"),
-        ]);
-
-      privateKey = await fs.readFile(privateKeyPath, "utf-8");
-
-      certificate = await fs.readFile(certificatePath, "utf-8");
-
-      ca = await fs.readFile(caPath, "utf-8");
-    } else {
-      console.log("Downloading certificates from render");
-
-      privateKey = config.ssl.privateKey;
-
-      certificate = config.ssl.certfificate;
-
-      ca = config.ssl.ca;
-    }
+    const { key, cert, ca } = await flagCertificates();
 
     const credentials = {
-      key: privateKey,
-      cert: certificate,
-      ca: ca,
+      key,
+      cert,
+      ca,
     };
 
     const server = https.createServer(credentials, (req, res) => {
