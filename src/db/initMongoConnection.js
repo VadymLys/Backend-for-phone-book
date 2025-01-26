@@ -10,7 +10,6 @@ export async function initMongoConnection() {
     const {
       db: { user, pwd, url, db },
     } = config;
-    console.log("🚀 ~ initMongoConnection ~ db:", db);
 
     const mongoDBURL = `mongodb+srv://${user}:${pwd}@${url}/${db}?retryWrites=true&w=majority&appName=Cluster0&tls=true`;
 
