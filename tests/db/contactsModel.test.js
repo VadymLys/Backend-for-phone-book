@@ -1,7 +1,7 @@
 import { describe, it, before, after } from "node:test";
 import assert from "assert";
-import { ContactCollection } from "../src/db/models/contact.js";
-import { initMongoConnection } from "../src/db/initMongoConnection.js";
+import { ContactCollection } from "../../src/db/models/contact.js";
+import { initMongoConnection } from "../../src/db/initMongoConnection.js";
 import mongoose from "mongoose";
 
 describe("ContactCollection", () => {

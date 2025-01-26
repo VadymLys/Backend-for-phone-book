@@ -7,6 +7,7 @@ export async function flagCertificates() {
     let privateKey;
     let certificate;
     let ca;
+    let fullchain;
 
     const isAWSEnabled = config.aws.enableAWS === "true";
 
@@ -18,17 +19,19 @@ export async function flagCertificates() {
         !bucketName ||
         !config.aws.privateKeyPath ||
         !config.aws.certficatePath ||
-        !config.aws.ca
+        !config.aws.ca ||
+        !config.aws.fullchainPath
       ) {
         throw new Error(
           "One or more required environment variables are missing."
         );
       }
-      const [privateKeyPath, certificatePath, caPath] =
+      const [privateKeyPath, certificatePath, caPath, fullchainPath] =
         await downloadCertificates(bucketName, [
           config.aws.privateKeyPath,
           config.aws.certficatePath,
           config.aws.ca,
+          config.aws.fullchainPath,
         ]);
 
       privateKey = await fs.readFile(privateKeyPath, "utf-8");
@@ -36,6 +39,8 @@ export async function flagCertificates() {
       certificate = await fs.readFile(certificatePath, "utf-8");
 
       ca = await fs.readFile(caPath, "utf-8");
+
+      fullchain = await fs.readFile(fullchainPath, "utf-8");
     } else {
       console.log("Downloading certificates from render");
 
@@ -44,12 +49,15 @@ export async function flagCertificates() {
       certificate = config.ssl.certificate;
 
       ca = config.ssl.ca;
+
+      fullchain = config.ssl.fullchain;
     }
 
     return {
       key: privateKey,
       cert: certificate,
       ca: ca,
+      fullchain: fullchain,
     };
   } catch (err) {
     throw new Error("Error with certificates");

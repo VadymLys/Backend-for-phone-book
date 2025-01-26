@@ -22,12 +22,13 @@ dotenv.config();
 
 export async function startServer() {
   try {
-    const { key, cert, ca } = await flagCertificates();
+    const { key, cert, ca, fullchain } = await flagCertificates();
 
     const credentials = {
       key,
       cert,
       ca,
+      fullchain,
     };
 
     const server = https.createServer(credentials, (req, res) => {
