@@ -14,8 +14,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "nodemon": "^2.0.5"
+    "cross-env": "7.0.3",
+    "nodemon": "2.0.5",
+    "supertest": "7.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.687.0",

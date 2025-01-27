@@ -1,34 +1,53 @@
-import { test } from "node:test";
+import { it, describe, before, after } from "node:test";
 import assert from "node:assert";
 import https from "node:https";
 import { config } from "../../config/index.js";
 import fetch from "node-fetch";
+import { startServer } from "../../server.js";
 
-const httpsAgent = new https.Agent({
-  key: config.ssl.privateKey,
-  cert: config.ssl.certificate,
-  ca: config.ssl.ca || config.ssl.fullchain,
-});
+let server;
+let baseUrl;
 
-test("GET /contacts", async () => {
-  try {
-    const url = "https://localhost:443/contacts";
+describe("Contacts API", () => {
+  before(async () => {
+    server = await startServer();
+    console.log("Connecting to test server");
+    baseUrl = `https://localhost:${server.address().port}`;
+  });
 
-    const response = await fetch(url, { agent: httpsAgent });
-
-    const data = response.json();
-
-    console.log("Response Status:", response.status);
-    console.log("Response Headers:", response.headers);
-
-    assert.strictEqual(response.status, 200, "Expected HTTPS 200 status");
-    assert(Array.isArray(data), "Response should be an array");
-
-    if (data.length > 0) {
-      "name" in data[0] && "phoneNumber" in data[0],
-        "Expected objects in the array to have 'name' and 'phoneNumber'";
+  after(async () => {
+    if (server) {
+      console.log("Closing server connection");
+      await new Promise((resolve) => server.close(resolve));
+      console.log("server connection closed");
     }
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  });
+
+  it("GET /contacts", async () => {
+    try {
+      const httpsAgent = new https.Agent({
+        key: config.ssl.privateKey,
+        cert: config.ssl.certificate,
+        ca: config.ssl.ca || config.ssl.fullchain,
+      });
+
+      const url = `${baseUrl}/contacts`;
+      const response = await fetch(url, { agent: httpsAgent });
+
+      const data = await response.json();
+
+      console.log("Response Status:", response.status);
+      console.log("Response Headers:", response.headers);
+
+      assert.strictEqual(response.status, 200, "Expected HTTPS 200 status");
+      assert(Array.isArray(data), "Response should be an array");
+
+      if (data.length > 0) {
+        "name" in data[0] && "phoneNumber" in data[0],
+          "Expected objects in the array to have 'name' and 'phoneNumber'";
+      }
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  });
 });
