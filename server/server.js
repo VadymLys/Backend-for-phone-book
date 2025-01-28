@@ -5,18 +5,19 @@ import {
   createContactController,
   deleteContactController,
   getContactsController,
-} from "./src/controllers/contactController.js";
+} from "../src/controllers/contactController.js";
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
-} from "./src/controllers/userControllers.js";
-import { findAvailablePort } from "./src/utils/findDesiredPort.js";
-import { __dirname } from "./src/constants/index.js";
-import ctrlWrapper from "./src/utils/ctrlWrapper.js";
-import { setCORSHeaders } from "./src/utils/corsHeaders.js";
-import { flagCertificates } from "./src/utils/certificates.js";
+} from "../src/controllers/userControllers.js";
+import { findAvailablePort } from "../src/utils/findDesiredPort.js";
+import { __dirname } from "../src/constants/index.js";
+import ctrlWrapper from "../src/utils/ctrlWrapper.js";
+import { setCORSHeaders } from "../src/utils/corsHeaders.js";
+import { flagCertificates } from "../src/utils/certificates.js";
+import { trackConnections } from "./server-utils.js";
 
 dotenv.config();
 
@@ -37,6 +38,9 @@ export async function startServer() {
       if (handledCors) {
         return;
       }
+
+      trackConnections(server);
+
       const method = req.method;
       const url = req.url.split("?")[0];
 
@@ -65,16 +69,17 @@ export async function startServer() {
     });
 
     const desiredPort = process.env.PORT || 443;
-    findAvailablePort(desiredPort)
-      .then((port) => {
-        server.listen(port, () => {
-          console.log(`server listening on port https://localhost:${port}`);
-        });
-      })
-      .catch((err) => {
-        console.error("Error finding available port:", err);
-        throw new Error("Failed to find available port.");
+    try {
+      const port = await findAvailablePort(desiredPort);
+
+      server.listen(port, () => {
+        console.log(`server listening on port https://localhost:${port}`);
       });
+    } catch (err) {
+      console.error("Error finding available port:", err);
+      throw new Error("Failed to find available port.");
+    }
+    return server;
   } catch (err) {
     console.error("Error starting server:", err);
     process.exit(1);
