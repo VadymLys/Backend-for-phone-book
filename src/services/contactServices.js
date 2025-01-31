@@ -25,7 +25,8 @@ export async function findAllContacts(req, res, { page = 1, perPage = 10 }) {
         error: err.message,
       })
     );
-    console.log(err.message);
+    console.error("Error fetching contacts:", err);
+    return { contacts: [], total: 0 };
   }
 }
 

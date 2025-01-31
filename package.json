@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "cross-env NODE_ENV=test node --test tests/",
-    "test:db": "cross-env NODE_ENV=test node --test tests/db",
+    "test:db": "cross-env NODE_ENV=test  node --test tests/db",
     "test:api": "cross-env NODE_ENV=test node --test tests/api",
     "dev": "nodemon index.js"
   },

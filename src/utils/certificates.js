@@ -60,6 +60,7 @@ export async function flagCertificates() {
       fullchain: fullchain,
     };
   } catch (err) {
+    console.error(err.message);
     throw new Error("Error with certificates");
   }
 }

@@ -14,10 +14,13 @@ const sessionsSchema = new Schema(
     sessionId: { type: String, required: true },
   },
   {
-    collection: "sessionsBackend",
     timestamps: true,
     versionKey: false,
   }
 );
 
-export const SessionsCollection = model("sessions", sessionsSchema);
+export const SessionsCollection = model(
+  "Session",
+  sessionsSchema,
+  process.env.NODE_ENV === "test" ? "sessions_test" : "sessions"
+);

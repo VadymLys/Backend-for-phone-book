@@ -28,7 +28,7 @@ describe("ContactCollection", () => {
   it("return all contacts", async () => {
     try {
       const contacts = await ContactCollection.find();
-      assert.strictEqual(contacts.length, contacts.length);
+      assert.strictEqual(contacts.length, 10);
     } catch (err) {
       throw new Error(err.message);
     }

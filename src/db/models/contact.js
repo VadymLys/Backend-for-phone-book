@@ -13,10 +13,13 @@ const contactsSchema = new Schema(
     },
   },
   {
-    collection: "contactsBackend",
     timestamps: true,
     versionKey: false,
   }
 );
 
-export const ContactCollection = model("Contact", contactsSchema);
+export const ContactCollection = model(
+  "Contact",
+  contactsSchema,
+  process.env.NODE_ENV === "test" ? "contacts_test" : "contacts"
+);

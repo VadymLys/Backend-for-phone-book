@@ -7,7 +7,6 @@ const usersSchema = new Schema(
     password: { type: String, required: true },
   },
   {
-    collection: "usersBackend",
     timestamps: true,
     versionKey: false,
   }
@@ -17,4 +16,8 @@ usersSchema.methods.toJSON = function () {
   delete obj.password;
   return obj;
 };
-export const UsersCollection = model("users", usersSchema);
+export const UsersCollection = model(
+  "User",
+  usersSchema,
+  process.env.NODE_ENV === "test" ? "users_test" : "users"
+);

@@ -1,90 +1,56 @@
 import { it, describe, before, after } from "node:test";
 import assert from "node:assert";
-import https from "node:https";
-import { config } from "../../config/index.js";
-import fetch from "node-fetch";
 import { startServer } from "../../server/server.js";
 import { closeConnections } from "../../server/server-utils.js";
 import { initMongoConnection } from "../../src/db/initMongoConnection.js";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
+import request from "supertest";
 
 let server;
-let baseUrl;
-
-https.globalAgent = new https.Agent({
-  key: config.ssl.privateKey,
-  cert: config.ssl.certificate,
-  ca: (await config.ssl.ca) || (await config.ssl.fullchain),
-  rejectUnauthorized: false,
-});
+let app;
 
 describe("Contacts API", () => {
   before(async () => {
-    try {
-      await initMongoConnection();
+    await initMongoConnection();
+    server = await startServer();
 
-      server = await startServer();
-      console.log("Connecting to test server");
-      baseUrl = `https://localhost:${server.address().port}`;
-    } catch (err) {
-      console.error("Error while starting the server:", err);
-      throw err;
-    }
+    console.log("Connecting to test server");
+
+    app = request(server);
   });
 
   after(async () => {
     if (server) {
       console.log("Closing server connection");
-      try {
-        await closeConnections();
+      await closeConnections();
 
-        await new Promise((resolve, reject) => {
-          server.close((err) => {
-            if (err) {
-              console.error("Error while closing server:", err);
-              return reject(err);
-            } else {
-              console.log("Server connection successfully closed.");
-              resolve();
-            }
-          });
-        });
-        console.log("server connection closed");
+      await server.close();
 
-        try {
-          mongoose.disconnect();
-          console.log("MongoDB connection closed");
-        } catch (err) {
-          console.error(err.message);
-        }
-      } catch (err) {
-        throw new Error(err.message);
-      }
+      await mongoose.disconnect();
+      console.log("MongoDB connection closed");
     } else {
       console.log("Server instance was not initialized.");
     }
   });
 
   it("GET /contacts", async () => {
-    try {
-      const url = `${baseUrl}/contacts`;
-      const response = await fetch(url, { agent: https.globalAgent });
+    const response = await app.get("/contacts?page=1&perPage=10").expect(200);
 
-      const data = await response.json();
+    assert.strictEqual(response.status, 200, "Expected HTTPS 200 status");
+    assert(
+      Array.isArray(response.body.data.contacts),
+      "Expected an array of contacts"
+    );
 
-      console.log("Response Status:", response.status);
-      console.log("Response Headers:", response.headers);
-
-      assert.strictEqual(response.status, 200, "Expected HTTPS 200 status");
-      assert("contacts" in data, "Expected 'contacts' in response");
-      assert(Array.isArray(data.contacts), "Response should be an array");
-
-      if (data.length > 0) {
-        "name" in data[0] && "phoneNumber" in data[0],
-          "Expected objects in the array to have 'name' and 'phoneNumber'";
-      }
-    } catch (err) {
-      throw new Error(err.message);
+    if (response.body.data.contacts.length > 0) {
+      assert(
+        "name" in response.body.data.contacts[0],
+        "Expected 'name' in contact object"
+      );
+      assert(
+        "phoneNumber" in response.body.data.contacts[0],
+        "Expected  'phoneNumber' in contact object "
+      );
     }
   });
 });
