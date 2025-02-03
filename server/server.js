@@ -86,7 +86,7 @@ export async function startServer() {
     try {
       const port = await findAvailablePort(desiredPort);
 
-      server.listen(port, () => {
+      httpsServer.listen(port, () => {
         console.log(`server listening on port https://localhost:${port}`);
       });
     } catch (err) {
