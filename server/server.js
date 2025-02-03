@@ -1,5 +1,6 @@
 import https from "https";
 import dotenv from "dotenv";
+import http from "http";
 
 import {
   createContactController,
@@ -14,6 +15,7 @@ import {
 } from "../src/controllers/userControllers.js";
 import { findAvailablePort } from "../src/utils/findDesiredPort.js";
 import { __dirname } from "../src/constants/index.js";
+console.log("🚀 ~ __dirname :", __dirname);
 import ctrlWrapper from "../src/utils/ctrlWrapper.js";
 import { setCORSHeaders } from "../src/utils/corsHeaders.js";
 import { flagCertificates } from "../src/utils/certificates.js";
@@ -34,18 +36,23 @@ export async function startServer() {
       fullchain,
     };
 
-    const server = https.createServer(credentials, (req, res) => {
+    const httpServer = http.createServer(async (req, res) => {
+      if (await serveAcmeChallenge(req, res)) {
+        return;
+      }
+
+      res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
+      res.end();
+    });
+
+    const httpsServer = https.createServer(credentials, (req, res) => {
       const handledCors = setCORSHeaders(req, res);
 
       if (handledCors) {
         return;
       }
 
-      if (serveAcmeChallenge(req, res)) {
-        return;
-      }
-
-      trackConnections(server);
+      trackConnections(httpsServer);
 
       // throttle(req, res, () => {
       const method = req.method;
@@ -86,7 +93,7 @@ export async function startServer() {
       console.error("Error finding available port:", err);
       throw new Error("Failed to find available port.");
     }
-    return server;
+    return httpsServer;
   } catch (err) {
     console.error("Error starting server:", err);
     process.exit(1);

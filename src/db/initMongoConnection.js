@@ -12,7 +12,6 @@ export async function initMongoConnection() {
 
     const mongoDBURL = `mongodb+srv://${user}:${pwd}@${url}/${db}?retryWrites=true&w=majority&appName=Cluster0&tls=true`;
 
-    console.log("🚀 ~ initMongoConnection ~ db:", db);
     await mongoose.connect(mongoDBURL);
     console.log("Mongo connection successfully established!");
   } catch (error) {
