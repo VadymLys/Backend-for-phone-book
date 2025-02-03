@@ -8,6 +8,7 @@ export const isRender = process.env.RENDER === "true";
 export const __dirname = isRender
   ? path.join(process.cwd())
   : path.join(process.cwd(), "src");
+console.log("🚀 ~ __dirname :", __dirname);
 
 export const certsDir = isRender
   ? path.join(os.tmpdir(), "certificates")

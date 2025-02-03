@@ -47,33 +47,33 @@ export async function startServer() {
 
       trackConnections(server);
 
-      throttle(req, res, () => {
-        const method = req.method;
-        const url = req.url.split("?")[0];
-        if (url === "/contacts" && method === "GET") {
-          ctrlWrapper(getContactsController(req, res));
-        } else if (url === "/contacts" && method === "POST") {
-          ctrlWrapper(createContactController(req, res));
-        } else if (
-          url.match(/^\/contacts\/([a-fA-F0-9]{24})$/) &&
-          method === "DELETE"
-        ) {
-          const id = url.split("/")[2];
-          ctrlWrapper(deleteContactController)(req, res, id);
-        } else if (url === "/users/signup" && method === "POST") {
-          ctrlWrapper(registerUserController(req, res));
-        } else if (url === "/users/login" && method === "POST") {
-          ctrlWrapper(loginUserController(req, res));
-        } else if (url === "/users/logout" && method === "POST") {
-          ctrlWrapper(logoutUserController(req, res));
-        } else if (url === "/users/current" && method === "GET") {
-          ctrlWrapper(refreshUserSessionController(req, res));
-        } else {
-          res.writeHead(404, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ message: "Not Found" }));
-        }
-      });
+      // throttle(req, res, () => {
+      const method = req.method;
+      const url = req.url.split("?")[0];
+      if (url === "/contacts" && method === "GET") {
+        ctrlWrapper(getContactsController(req, res));
+      } else if (url === "/contacts" && method === "POST") {
+        ctrlWrapper(createContactController(req, res));
+      } else if (
+        url.match(/^\/contacts\/([a-fA-F0-9]{24})$/) &&
+        method === "DELETE"
+      ) {
+        const id = url.split("/")[2];
+        ctrlWrapper(deleteContactController)(req, res, id);
+      } else if (url === "/users/signup" && method === "POST") {
+        ctrlWrapper(registerUserController(req, res));
+      } else if (url === "/users/login" && method === "POST") {
+        ctrlWrapper(loginUserController(req, res));
+      } else if (url === "/users/logout" && method === "POST") {
+        ctrlWrapper(logoutUserController(req, res));
+      } else if (url === "/users/current" && method === "GET") {
+        ctrlWrapper(refreshUserSessionController(req, res));
+      } else {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Not Found" }));
+      }
     });
+    // });
 
     const desiredPort = process.env.PORT || 443;
     try {
