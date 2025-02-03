@@ -75,7 +75,7 @@ export async function startServer() {
       });
     });
 
-    const desiredPort = process.env.PORT || 80;
+    const desiredPort = process.env.PORT || 443;
     try {
       const port = await findAvailablePort(desiredPort);
 
