@@ -4,7 +4,7 @@ import { env } from "./env.js";
 export function getUserIdFromToken(token) {
   try {
     if (!token) {
-      console.error("Токен не передано!");
+      console.error("Token not provided!");
       return null;
     }
 

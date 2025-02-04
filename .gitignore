@@ -4,10 +4,8 @@
 
 .env
 .env.test
-certificates/
-.well-known/
+certs/
 config/
-acmeConfig/
 .vscode
 .DS_Store
 .idea
