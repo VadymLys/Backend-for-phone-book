@@ -7,6 +7,7 @@ import { certsDir } from "../../constants/index.js";
 
 export async function downloadFile(bucketName, key) {
   const filePath = path.resolve(certsDir, path.basename(key));
+  console.log("🚀 ~ downloadFile ~ filePath:", filePath);
 
   try {
     await fs.access(filePath);

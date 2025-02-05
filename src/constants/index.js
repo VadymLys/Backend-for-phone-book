@@ -1,13 +1,15 @@
-import path from "path";
-import os from "os";
-
 export const FIFTEEN_MINUTES = 15 * 60 * 1000;
 export const ONE_DAY = 24 * 60 * 60 * 1000;
 export const isRender = process.env.RENDER === "true";
+import path from "path";
+import { getDirname } from "../utils/pathHelper.js";
 
-export const __dirname = isRender ? path.resolve() : path.join(process.cwd());
+const __dirname = getDirname(import.meta.url);
 
-export const certsDir = isRender
-  ? path.join(os.tmpdir(), "certificates")
-  : path.join(process.cwd(), "certs", "certificates");
-console.log("🚀 ~ certsDir :", certsDir);
+export const certsDir = path.join(
+  __dirname,
+  "..",
+  "..",
+  "certs",
+  "certificates"
+);

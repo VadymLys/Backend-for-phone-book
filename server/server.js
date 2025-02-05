@@ -14,14 +14,13 @@ import {
   registerUserController,
 } from "../src/controllers/userControllers.js";
 import { findAvailablePort } from "../src/utils/findDesiredPort.js";
-import { __dirname } from "../src/constants/index.js";
-console.log("🚀 ~ __dirname :", __dirname);
 import ctrlWrapper from "../src/utils/ctrlWrapper.js";
 import { setCORSHeaders } from "../src/utils/corsHeaders.js";
 import { flagCertificates } from "../src/utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
 import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
+import path from "path";
 
 dotenv.config();
 
