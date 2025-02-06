@@ -1,4 +1,4 @@
-import { config } from "../../config/index.js";
+import { config } from "../config/index.js";
 import { downloadCertificates } from "./functionsAWS/downloadCertificates.js";
 import fs from "fs/promises";
 

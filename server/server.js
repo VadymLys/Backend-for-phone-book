@@ -20,7 +20,6 @@ import { flagCertificates } from "../src/utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
 import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
-import path from "path";
 
 dotenv.config();
 
