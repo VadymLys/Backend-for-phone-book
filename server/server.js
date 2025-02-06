@@ -18,7 +18,7 @@ import ctrlWrapper from "../src/utils/ctrlWrapper.js";
 import { setCORSHeaders } from "../src/utils/corsHeaders.js";
 import { flagCertificates } from "../src/utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
-import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
+import { serveAcmeChallenge } from "../src/certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
 
 dotenv.config();
