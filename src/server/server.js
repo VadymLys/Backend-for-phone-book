@@ -6,19 +6,19 @@ import {
   createContactController,
   deleteContactController,
   getContactsController,
-} from "../src/controllers/contactController.js";
+} from "../controllers/contactController.js";
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
-} from "../src/controllers/userControllers.js";
-import { findAvailablePort } from "../src/utils/findDesiredPort.js";
-import ctrlWrapper from "../src/utils/ctrlWrapper.js";
-import { setCORSHeaders } from "../src/utils/corsHeaders.js";
-import { flagCertificates } from "../src/utils/certificates.js";
+} from "../controllers/userControllers.js";
+import { findAvailablePort } from "../utils/findDesiredPort.js";
+import ctrlWrapper from "../utils/ctrlWrapper.js";
+import { setCORSHeaders } from "../utils/corsHeaders.js";
+import { flagCertificates } from "../utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
-import { serveAcmeChallenge } from "../src/certs/acmeConfig/acmeConfig.js";
+import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
 
 dotenv.config();
@@ -50,9 +50,9 @@ export async function startServer() {
         return;
       }
 
-      trackConnections(httpsServer);
-
       throttle(req, res, () => {
+        trackConnections(httpsServer);
+
         const method = req.method;
         const url = req.url.split("?")[0];
         if (url === "/contacts" && method === "GET") {

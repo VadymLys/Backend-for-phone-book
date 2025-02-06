@@ -1,7 +1,8 @@
 const rateLimitMap = new Map();
 
 export function throttle(req, res, next) {
-  const ip = req.socket.remoteAddress;
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
   const now = Date.now();
   const timeWindow = 10 * 1000;
   const maxRequests = 5;
