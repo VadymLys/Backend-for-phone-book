@@ -6,4 +6,10 @@ import { getDirname } from "../utils/pathHelper.js";
 
 const __dirname = getDirname(import.meta.url);
 
-export const certsDir = path.join(__dirname, "..", "certs", "certificates");
+export const certsDir = path.join(
+  __dirname,
+  "..",
+  "..",
+  "certs",
+  "certificates"
+);

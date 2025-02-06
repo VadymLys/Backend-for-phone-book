@@ -18,8 +18,23 @@ import ctrlWrapper from "../utils/ctrlWrapper.js";
 import { setCORSHeaders } from "../utils/corsHeaders.js";
 import { flagCertificates } from "../utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
-import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
+import { serveAcmeChallenge } from "../../certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
+
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Отримуємо абсолютний шлях до цього файлу
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Формуємо шлях так, як у імпорті
+const acmeConfigPath = path.resolve(
+  __dirname,
+  "../../certs/acmeConfig/acmeConfig.js"
+);
+
+console.log(acmeConfigPath);
 
 dotenv.config();
 
