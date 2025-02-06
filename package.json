@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server/server.js",
     "test": "cross-env NODE_ENV=test node --test tests/",
     "test:db": "cross-env NODE_ENV=test  node --test tests/db",
     "test:api": "cross-env NODE_ENV=test node --test tests/api",
