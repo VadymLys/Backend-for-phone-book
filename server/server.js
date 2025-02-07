@@ -13,28 +13,13 @@ import {
   refreshUserSessionController,
   registerUserController,
 } from "../src/controllers/userControllers.js";
-import { findAvailablePort } from "../utils/findDesiredPort.js";
-import ctrlWrapper from "../utils/ctrlWrapper.js";
-import { setCORSHeaders } from "../utils/corsHeaders.js";
-import { flagCertificates } from "../utils/certificates.js";
+import { findAvailablePort } from "../src/utils/findDesiredPort.js";
+import ctrlWrapper from "../src/utils/ctrlWrapper.js";
+import { setCORSHeaders } from "../src/utils/corsHeaders.js";
+import { flagCertificates } from "../src/utils/certificates.js";
 import { trackConnections } from "./server-utils.js";
-import { serveAcmeChallenge } from "../../certs/acmeConfig/acmeConfig.js";
+import { serveAcmeChallenge } from "../certs/acmeConfig/acmeConfig.js";
 import { throttle } from "./throttle.js";
-
-import path from "path";
-import { fileURLToPath } from "url";
-
-// Отримуємо абсолютний шлях до цього файлу
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Формуємо шлях так, як у імпорті
-const acmeConfigPath = path.resolve(
-  __dirname,
-  "../../certs/acmeConfig/acmeConfig.js"
-);
-
-console.log(acmeConfigPath);
 
 dotenv.config();
 
