@@ -6,13 +6,13 @@ import {
   createContactController,
   deleteContactController,
   getContactsController,
-} from "../controllers/contactController.js";
+} from "../src/controllers/contactController.js";
 import {
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
   registerUserController,
-} from "../controllers/userControllers.js";
+} from "../src/controllers/userControllers.js";
 import { findAvailablePort } from "../utils/findDesiredPort.js";
 import ctrlWrapper from "../utils/ctrlWrapper.js";
 import { setCORSHeaders } from "../utils/corsHeaders.js";
